@@ -350,11 +350,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57e51f7fbb6230147a6e242d4648342b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSpeed: 10
-  fastMovementSpeed: 50
+  movementSpeed: 50
+  fastMovementSpeed: 100
   freeLookSensitivity: 3
   zoomSensitivity: 10
-  fastZoomSensitivity: 50
+  fastZoomSensitivity: 20
 --- !u!1 &704842387
 GameObject:
   m_ObjectHideFlags: 0
@@ -564,13 +564,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chunkSize: 16
-  worldWidth: 5
-  worldHeight: 3
-  worldDepth: 5
+  worldWidth: 1
+  worldHeight: 1
+  worldDepth: 1
   isolevel: 0.5
   seed: 3081
   chunkPrefab: {fileID: 7489232383384105734, guid: 58c1dc75b64dbec41a572954c3bcd523,
     type: 3}
+  useJobs: 1
 --- !u!1 &1745965427
 GameObject:
   m_ObjectHideFlags: 0

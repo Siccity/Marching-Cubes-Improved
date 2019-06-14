@@ -10,8 +10,8 @@ public class TerrainEditor : MonoBehaviour
 
     [SerializeField] private AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
 
-    [SerializeField] private World world;
-    [SerializeField] private Transform playerCamera;
+    [SerializeField] private World world = null;
+    [SerializeField] private Transform playerCamera = null;
 
     Chunk[] _initChunks;
 

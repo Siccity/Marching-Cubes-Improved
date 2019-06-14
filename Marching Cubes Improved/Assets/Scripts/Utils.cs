@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Collections;
+using UnityEngine;
 
 public static class Utils
 {
@@ -254,5 +255,45 @@ public static class Utils
     public static float Map(this float value, float x1, float y1, float x2, float y2)
     {
         return (value - x1) / (y1 - x1) * (y2 - x2) + x2;
+    }
+
+    public static NativeArray<Point> ToNativeArray(this Point[,,] points)
+    {
+        NativeArray<Point> newPoints = new NativeArray<Point>(points.GetLength(0)*points.GetLength(1)*points.GetLength(2), Allocator.Temp);
+
+        int i = 0;
+        for (int z = 0; z < points.GetLength(2); z++)
+        {
+            for (int y = 0; y < points.GetLength(1); y++)
+            {
+                for (int x = 0; x < points.GetLength(0); x++)
+                {
+                    newPoints[i] = points[x, y, z];
+                    i++;
+                }
+            }
+        }
+
+        return newPoints;
+    }
+
+    public static NativeArray<Point> ToNativeArray(this Point[,,] points, Allocator allocator)
+    {
+        NativeArray<Point> newPoints = new NativeArray<Point>(points.GetLength(0) * points.GetLength(1) * points.GetLength(2), allocator);
+
+        int i = 0;
+        for (int z = 0; z < points.GetLength(2); z++)
+        {
+            for (int y = 0; y < points.GetLength(1); y++)
+            {
+                for (int x = 0; x < points.GetLength(0); x++)
+                {
+                    newPoints[i] = points[x, y, z];
+                    i++;
+                }
+            }
+        }
+
+        return newPoints;
     }
 }

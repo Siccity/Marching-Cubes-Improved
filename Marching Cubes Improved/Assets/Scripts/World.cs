@@ -20,6 +20,7 @@ public class World : MonoBehaviour
     private Bounds worldBounds;
 
     public DensityGenerator densityGenerator;
+    public bool useJobs;
 
     private void Awake()
     {

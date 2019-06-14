@@ -1,21 +1,20 @@
 ﻿using UnityEngine;
 
-public class MarchingCubes
+public static class MarchingCubes
 {
-    private Vector3[] _vertices;
-    private int[] _triangles;
-    private float _isolevel;
-
-    private int _vertexIndex;
-
-    private Vector3[] _vertexList;
-    private Point[] _initPoints;
-    private Mesh _mesh;
-    private int[,,] _cubeIndexes;
+    private static Vector3[] _vertices;
+    private static int[] _triangles;
+    public  static float _isolevel;
+             
+    private static int _vertexIndex;
+             
+    private static Vector3[] _vertexList;
+    private static Point[] _initPoints;
+    private static Mesh _mesh;
+    private static int[,,] _cubeIndexes;
     
-    private readonly Vector3 zero = Vector3.zero;
 
-    public MarchingCubes(Point[,,] points, float isolevel, int seed)
+    public static void Initialize(Point[,,] points, float isolevel, int seed)
     {
         _isolevel = isolevel;
 
@@ -28,7 +27,7 @@ public class MarchingCubes
         _cubeIndexes = new int[points.GetLength(0)-1, points.GetLength(1)-1, points.GetLength(2)-1];
     }
 
-    private Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2)
+    public static Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2)
     {
         if (Utils.Abs(_isolevel - v1) < 0.000001f)
         {
@@ -50,7 +49,7 @@ public class MarchingCubes
         return p;
     }
 
-    private void March(Point[] points, int cubeIndex)
+    public static void March(Point[] points, int cubeIndex)
     {
         int edgeIndex = LookupTables.EdgeTable[cubeIndex];
 
@@ -74,7 +73,7 @@ public class MarchingCubes
         }
     }
 
-    private Vector3[] GenerateVertexList(Point[] points, int edgeIndex)
+    public static Vector3[] GenerateVertexList(Point[] points, int edgeIndex)
     {
         for (int i = 0; i < 12; i++)
         {
@@ -94,7 +93,7 @@ public class MarchingCubes
         return _vertexList;
     }
 
-    private int CalculateCubeIndex(Point[] points, float iso)
+    public static int CalculateCubeIndex(Point[] points, float iso)
     {
         int cubeIndex = 0;
 
@@ -105,7 +104,7 @@ public class MarchingCubes
         return cubeIndex;
     }
 
-    public Mesh CreateMeshData(Point[,,] points)
+    public static Mesh CreateMeshData(Point[,,] points)
     {
         _cubeIndexes = GenerateCubeIndexes(points);
         int vertexCount = GenerateVertexCount(_cubeIndexes);
@@ -143,18 +142,26 @@ public class MarchingCubes
         return _mesh;
     }
 
-    private Point[] GetPoints(int x, int y, int z, Point[,,] points)
+    public static Point[] GetPoints(int x, int y, int z, Point[,,] points)
     {
         for (int i = 0; i < 8; i++)
         {
-            Point p = points[x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]];
-            _initPoints[i] = p;
+            int newX = x + CubePointsX[i];
+            int newY = y + CubePointsY[i];
+            int newZ = z + CubePointsZ[i];
+
+            // If sometime in the future the chunk edge's will be different lengths (e.g. 16/256/16), newX and newZ may have to switch places
+            if (newX < points.GetLength(0) && newY < points.GetLength(1) && newZ < points.GetLength(2))
+            {
+                Point p = points[x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]];
+                _initPoints[i] = p;
+            }
         }
 
         return _initPoints;
     }
 
-    private int[,,] GenerateCubeIndexes(Point[,,] points)
+    public static int[,,] GenerateCubeIndexes(Point[,,] points)
     {
         for (int x = 0; x < points.GetLength(0)-1; x++)
         {
@@ -164,7 +171,8 @@ public class MarchingCubes
                 {
                     _initPoints = GetPoints(x, y, z, points);
 
-                    _cubeIndexes[x, y, z] = CalculateCubeIndex(_initPoints, _isolevel);
+                    int cubeIndex = CalculateCubeIndex(_initPoints, _isolevel);
+                    _cubeIndexes[x, y, z] = cubeIndex;
                 }
             }
         }
@@ -172,7 +180,7 @@ public class MarchingCubes
         return _cubeIndexes;
     }
 
-    private int GenerateVertexCount(int[,,] cubeIndexes)
+    public static int GenerateVertexCount(int[,,] cubeIndexes)
     {
         int vertexCount = 0;
 
