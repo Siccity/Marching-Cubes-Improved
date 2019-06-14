@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public struct Point
 {
@@ -22,6 +23,15 @@ public struct Point
         }
 
         return false;
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = 1771454171;
+        hashCode = hashCode * -1521134295 + EqualityComparer<Vector3Int>.Default.GetHashCode(localPosition);
+        hashCode = hashCode * -1521134295 + density.GetHashCode();
+        hashCode = hashCode * -1521134295 + initialized.GetHashCode();
+        return hashCode;
     }
 
     public override string ToString()
