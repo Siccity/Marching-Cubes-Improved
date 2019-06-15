@@ -147,6 +147,11 @@ public static class Utils
         return value >= min && value <= max;
     }
 
+    public static bool IsBetween(this Vector3Int value, Vector3Int min, Vector3Int max)
+    {
+        return value.x.IsBetween(min.x, max.x) && value.y.IsBetween(min.y, max.y) && value.z.IsBetween(min.z, max.z);
+    }
+
     public static float Pow(this int @base, int exponent)
     {
         bool exponentNegative = exponent < 0;

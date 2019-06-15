@@ -54,7 +54,6 @@ public class Chunk : MonoBehaviour
         points = new Point[chunkSize + 1, chunkSize + 1, chunkSize + 1];
 
         _seed = world.seed;
-        MarchingCubes.Initialize(points, _isolevel, _seed);
 
         for (int z = 0; z < points.GetLength(2); z++)
         {
@@ -73,36 +72,25 @@ public class Chunk : MonoBehaviour
 
     public void Generate()
     {
-        Mesh mesh;
-        if (_world.useJobs)
-        {
-            mesh = CreateMeshWithJobs();
-        }
-        else
-        {
-            mesh = MarchingCubes.CreateMeshData(points);
-        }
+        Mesh mesh = CreateMesh();
 
         _meshFilter.sharedMesh = mesh;
-        //_meshCollider.sharedMesh = mesh;
+        _meshCollider.sharedMesh = mesh;
     }
 
-    Mesh CreateMeshWithJobs()
+    Mesh CreateMesh()
     {
-        int[,,] cubeIndices = GenerateCubeIndices(this.points);
-
-        int vertexCount = GenerateVertexCount(cubeIndices);
-
-        // Inputs
         NativeArray<Point> points = this.points.ToNativeArray(Allocator.TempJob);
 
-        // Outputs
+        NativeArray<int> cubeIndices = MarchingCubesHelperFunctions.GenerateCubeIndices(points, chunkSize, _isolevel);
+
+        int vertexCount = MarchingCubesHelperFunctions.GenerateVertexCount(cubeIndices);
+
         NativeArray<Vector3> vertices = new NativeArray<Vector3>(vertexCount, Allocator.TempJob);
         NativeArray<int> triangles = new NativeArray<int>(vertexCount, Allocator.TempJob);
 
         MarchingCubesJob job = new MarchingCubesJob()
         {
-            // Inputs
             points = points,
             chunkSize = chunkSize,
             isolevel = _isolevel,
@@ -112,6 +100,9 @@ public class Chunk : MonoBehaviour
         };
 
         JobHandle jobHandle = job.Schedule();
+
+        Mesh mesh = new Mesh();
+        cubeIndices.Dispose();
 
         jobHandle.Complete();
 
@@ -123,75 +114,12 @@ public class Chunk : MonoBehaviour
         int[] meshTriangles = triangles.ToArray();
         triangles.Dispose();
 
-        Mesh mesh = new Mesh()
-        {
-            vertices = meshVertices,
-            triangles = meshTriangles
-        };
-
+        mesh.vertices = meshVertices;
+        mesh.triangles = meshTriangles;
+        
         mesh.RecalculateNormals();
 
         return mesh;
-    }
-
-    private int GenerateVertexCount(int[,,] cubeIndexes)
-    {
-        int vertexCount = 0;
-
-        for (int z = 0; z < cubeIndexes.GetLength(2); z++)
-        {
-            for (int y = 0; y < cubeIndexes.GetLength(1); y++)
-            {
-                for (int x = 0; x < cubeIndexes.GetLength(0); x++)
-                {
-                    int cubeIndex = cubeIndexes[x, y, z];
-                    int[] row = LookupTables.TriangleTable[cubeIndex];
-                    vertexCount += row.Length;
-                }
-            }
-        }
-
-        return vertexCount;
-    }
-
-    private int[,,] GenerateCubeIndices(Point[,,] points)
-    {
-        int[,,] cubeIndexes = new int[points.GetLength(0), points.GetLength(1), points.GetLength(2)];
-
-        for (int z = 0; z < points.GetLength(2) - 1; z++)
-        {
-            for (int y = 0; y < points.GetLength(1) - 1; y++)
-            {
-                for (int x = 0; x < points.GetLength(0) - 1; x++)
-                {
-                    cubeIndexes[x, y, z] = CalculateCubeIndex(GetPoints(x, y, z, points), _isolevel);
-                }
-            }
-        }
-
-        return cubeIndexes;
-    }
-
-    private int CalculateCubeIndex(Point[] points, float iso)
-    {
-        int cubeIndex = 0;
-
-        for (int i = 0; i < 8; i++)
-            if (points[i].density < iso)
-                cubeIndex |= 1 << i;
-
-        return cubeIndex;
-    }
-
-    private Point[] GetPoints(int x, int y, int z, Point[,,] points)
-    {
-        Point[] cubePoints = new Point[8];
-        for (int i = 0; i < 8; i++)
-        {
-            cubePoints[i] = points[x + MarchingCubes.CubePointsX[i], y + MarchingCubes.CubePointsY[i], z + MarchingCubes.CubePointsZ[i]];
-        }
-
-        return cubePoints;
     }
 
     public Point GetPoint(int x, int y, int z)
