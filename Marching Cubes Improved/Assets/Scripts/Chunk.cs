@@ -12,7 +12,7 @@ public class Chunk : MonoBehaviour
     private float _isolevel;
     private int _seed;
 
-    //private MarchingCubes _marchingCubes;
+    private MarchingCubes _marchingCubes;
     private MeshFilter _meshFilter;
     private MeshCollider _meshCollider;
     private DensityGenerator _densityGenerator;
@@ -54,7 +54,6 @@ public class Chunk : MonoBehaviour
         points = new Point[chunkSize + 1, chunkSize + 1, chunkSize + 1];
 
         _seed = world.seed;
-        MarchingCubes.Initialize(points, _isolevel, _seed);
 
         for (int z = 0; z < points.GetLength(2); z++)
         {
@@ -69,6 +68,8 @@ public class Chunk : MonoBehaviour
                 }
             }
         }
+
+        _marchingCubes = new MarchingCubes(points, _isolevel, _seed);
     }
 
     public void Generate()
@@ -80,7 +81,7 @@ public class Chunk : MonoBehaviour
         }
         else
         {
-            mesh = MarchingCubes.CreateMeshData(points);
+            mesh = _marchingCubes.CreateMeshData(points);
         }
 
         _meshFilter.sharedMesh = mesh;

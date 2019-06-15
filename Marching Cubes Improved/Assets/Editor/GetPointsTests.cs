@@ -7,6 +7,7 @@ public class GetPointsTest
     private int chunkSize = 16;
     private Point[,,] points;
     private DensityGenerator dg;
+    private MarchingCubes mc;
 
     [SetUp]
     public void Setup()
@@ -26,8 +27,7 @@ public class GetPointsTest
                 }
             }
         }
-
-        MarchingCubes.Initialize(points, 0.5f, 0);
+        mc = new MarchingCubes(points, 0.5f, 0);
     }
 
     [Test]
@@ -40,7 +40,7 @@ public class GetPointsTest
         NativeArray<Point> actual = MarchingCubesHelperFunctions.GetPoints(position.x, position.y, position.z, allPoints, chunkSize);
         allPoints.Dispose();
 
-        Point[] target = MarchingCubes.GetPoints(position.x, position.y, position.z, points);
+        Point[] target = mc.GetPoints(position.x, position.y, position.z, points);
 
         for (int i = 0; i < 8; i++)
         {
@@ -60,7 +60,7 @@ public class GetPointsTest
         NativeArray<Point> actual = MarchingCubesHelperFunctions.GetPoints(position.x, position.y, position.z, allPoints, chunkSize);
         allPoints.Dispose();
 
-        Point[] target = MarchingCubes.GetPoints(position.x, position.y, position.z, points);
+        Point[] target = mc.GetPoints(position.x, position.y, position.z, points);
 
         for (int i = 0; i < 8; i++)
         {
@@ -80,7 +80,7 @@ public class GetPointsTest
         NativeArray<Point> actual = MarchingCubesHelperFunctions.GetPoints(position.x, position.y, position.z, allPoints, chunkSize);
         allPoints.Dispose();
 
-        Point[] target = MarchingCubes.GetPoints(position.x, position.y, position.z, points);
+        Point[] target = mc.GetPoints(position.x, position.y, position.z, points);
 
         for (int i = 0; i < 8; i++)
         {
