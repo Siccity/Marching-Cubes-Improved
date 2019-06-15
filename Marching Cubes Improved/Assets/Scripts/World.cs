@@ -31,23 +31,23 @@ public class World : MonoBehaviour
     {
         Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
     }
-    
+
     private void Start()
     {
         worldBounds = new Bounds();
         UpdateBounds();
 
-        chunks = new Dictionary<Vector3Int, Chunk>(worldWidth*worldHeight*worldDepth);;
+        chunks = new Dictionary<Vector3Int, Chunk>(worldWidth*worldHeight*worldDepth);
         CreateChunks();
     }
 
     private void CreateChunks()
     {
-        for (int x = 0; x < worldWidth; x++)
+        for (int z = 0; z < worldDepth; z++)
         {
             for (int y = 0; y < worldHeight; y++)
             {
-                for (int z = 0; z < worldDepth; z++)
+                for (int x = 0; x < worldWidth; x++)
                 {
                     CreateChunk(x * chunkSize, y * chunkSize, z * chunkSize);
                 }
@@ -108,13 +108,13 @@ public class World : MonoBehaviour
             }
 
             Chunk chunk = GetChunk(chunkPos);
-            
+
             lastChunkPos = chunk.position;
 
             Vector3Int localPos = (dp - chunk.position).Mod(chunkSize + 1);
 
             chunk.SetDensity(density, localPos);
-            if (setReadyForUpdate) 
+            if (setReadyForUpdate)
                 chunk.readyForUpdate = true;
         }
     }
@@ -129,7 +129,7 @@ public class World : MonoBehaviour
         float middleX = worldWidth * chunkSize / 2f;
         float middleY = worldHeight * chunkSize / 2f;
         float middleZ = worldDepth * chunkSize / 2f;
-        
+
         Vector3 midPos = new Vector3(middleX, middleY, middleZ);
 
         Vector3Int size = new Vector3Int(

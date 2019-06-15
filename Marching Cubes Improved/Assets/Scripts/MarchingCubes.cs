@@ -12,7 +12,7 @@ public class MarchingCubes
     public Point[] _initPoints;
     public Mesh _mesh;
     public int[,,] _cubeIndexes;
-    
+
     public readonly Vector3 zero = Vector3.zero;
 
     public MarchingCubes(Point[,,] points, float isolevel, int seed)
@@ -20,12 +20,12 @@ public class MarchingCubes
         _isolevel = isolevel;
 
         _mesh = new Mesh();
-        
+
         _vertexIndex = 0;
 
         _vertexList = new Vector3[12];
         _initPoints = new Point[8];
-        _cubeIndexes = new int[points.GetLength(0)-1, points.GetLength(1)-1, points.GetLength(2)-1];
+        _cubeIndexes = new int[points.GetLength(0) - 1, points.GetLength(1) - 1, points.GetLength(2) - 1];
     }
 
     public Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2)
@@ -60,7 +60,7 @@ public class MarchingCubes
 
         for (int i = 0; i < row.Length; i += 3)
         {
-            _vertices[_vertexIndex] = _vertexList[row[i + 0]]; 
+            _vertices[_vertexIndex] = _vertexList[row[i + 0]];
             _triangles[_vertexIndex] = _vertexIndex;
             _vertexIndex++;
 
@@ -117,12 +117,12 @@ public class MarchingCubes
 
         _vertices = new Vector3[vertexCount];
         _triangles = new int[vertexCount];
-        
-        for (int x = 0; x < points.GetLength(0)-1; x++)
+
+        for (int z = 0; z < points.GetLength(2) - 1; z++)
         {
-            for (int y = 0; y < points.GetLength(1)-1; y++)
+            for (int y = 0; y < points.GetLength(1) - 1; y++)
             {
-                for (int z = 0; z < points.GetLength(2)-1; z++)
+                for (int x = 0; x < points.GetLength(0) - 1; x++)
                 {
                     int cubeIndex = _cubeIndexes[x, y, z];
                     if (cubeIndex == 0 || cubeIndex == 255) continue;
@@ -164,11 +164,11 @@ public class MarchingCubes
 
     public int[,,] GenerateCubeIndexes(Point[,,] points)
     {
-        for (int x = 0; x < points.GetLength(0)-1; x++)
+        for (int z = 0; z < points.GetLength(2) - 1; z++)
         {
-            for (int y = 0; y < points.GetLength(1)-1; y++)
+            for (int y = 0; y < points.GetLength(1) - 1; y++)
             {
-                for (int z = 0; z < points.GetLength(2)-1; z++)
+                for (int x = 0; x < points.GetLength(0) - 1; x++)
                 {
                     _initPoints = GetPoints(x, y, z, points);
 
@@ -184,11 +184,11 @@ public class MarchingCubes
     {
         int vertexCount = 0;
 
-        for (int x = 0; x < cubeIndexes.GetLength(0); x++)
+        for (int z = 0; z < cubeIndexes.GetLength(2); z++)
         {
             for (int y = 0; y < cubeIndexes.GetLength(1); y++)
             {
-                for (int z = 0; z < cubeIndexes.GetLength(2); z++)
+                for (int x = 0; x < cubeIndexes.GetLength(0); x++)
                 {
                     int cubeIndex = cubeIndexes[x, y, z];
                     int[] row = LookupTables.TriangleTable[cubeIndex];

@@ -262,43 +262,35 @@ public static class Utils
         return (value - x1) / (y1 - x1) * (y2 - x2) + x2;
     }
 
-    public static NativeArray<Point> ToNativeArray(this Point[,,] points)
+    public static NativeArray<T> ToNativeArray<T>(this T[,,] arr, Allocator allocator = Allocator.Temp) where T : struct
     {
-        NativeArray<Point> newPoints = new NativeArray<Point>(points.GetLength(0)*points.GetLength(1)*points.GetLength(2), Allocator.Temp);
+        NativeArray<T> newArr = new NativeArray<T>(arr.GetLength(0) * arr.GetLength(1) * arr.GetLength(2), allocator);
 
         int i = 0;
-        for (int z = 0; z < points.GetLength(2); z++)
+        for (int z = 0; z < arr.GetLength(2); z++)
         {
-            for (int y = 0; y < points.GetLength(1); y++)
+            for (int y = 0; y < arr.GetLength(1); y++)
             {
-                for (int x = 0; x < points.GetLength(0); x++)
+                for (int x = 0; x < arr.GetLength(0); x++)
                 {
-                    newPoints[i] = points[x, y, z];
+                    newArr[i] = arr[x, y, z];
                     i++;
                 }
             }
         }
 
-        return newPoints;
+        return newArr;
     }
 
-    public static NativeArray<Point> ToNativeArray(this Point[,,] points, Allocator allocator)
+    public static NativeArray<T> ToNativeArray<T>(this T[] arr) where T : struct
     {
-        NativeArray<Point> newPoints = new NativeArray<Point>(points.GetLength(0) * points.GetLength(1) * points.GetLength(2), allocator);
+        NativeArray<T> newArr = new NativeArray<T>(arr.Length, Allocator.Temp);
 
-        int i = 0;
-        for (int z = 0; z < points.GetLength(2); z++)
+        for (int i = 0; i < newArr.Length; i++)
         {
-            for (int y = 0; y < points.GetLength(1); y++)
-            {
-                for (int x = 0; x < points.GetLength(0); x++)
-                {
-                    newPoints[i] = points[x, y, z];
-                    i++;
-                }
-            }
+            newArr[i] = arr[i];
         }
 
-        return newPoints;
+        return newArr;
     }
 }

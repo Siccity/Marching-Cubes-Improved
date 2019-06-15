@@ -79,4 +79,19 @@ public class GetPointsTest
     public void GetPointsTest6(){
         TestGetPoint(new Vector3Int(chunkSize - 1, chunkSize - 1, chunkSize - 1));
     }
+
+    [Test]
+    public void GetPointsTest7()
+    {
+        for (int z = 0; z < chunkSize; z++)
+        {
+            for (int y = 0; y < chunkSize; y++)
+            {
+                for (int x = 0; x < chunkSize; x++)
+                {
+                    TestGetPoint(new Vector3Int(x, y, z));
+                }
+            }
+        }
+    }
 }

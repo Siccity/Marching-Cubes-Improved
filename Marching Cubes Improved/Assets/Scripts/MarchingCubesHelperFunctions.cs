@@ -80,7 +80,8 @@ public static class MarchingCubesHelperFunctions
 
         for (int i = 0; i < chunkSize * chunkSize * chunkSize; i++)
         {
-            NativeArray<Point> cubePoints = GetPoints(i, points, chunkSize);
+            Vector3Int pos = Convert1Dto3D(i, chunkSize, chunkSize);
+            NativeArray<Point> cubePoints = GetPoints(pos, points, chunkSize);
             int cubeIndex = CalculateCubeIndex(cubePoints, isolevel);
             cubeIndices[i] = cubeIndex;
             cubePoints.Dispose();
@@ -102,6 +103,12 @@ public static class MarchingCubesHelperFunctions
         }
 
         return cubeIndex;
+    }
+
+    public static NativeArray<Point> GetPoints(Vector3Int origin, NativeArray<Point> points, int chunkSize)
+    {
+        int index = Convert3Dto1D(origin, chunkSize + 1, chunkSize + 1);
+        return GetPoints(index, points, chunkSize);
     }
 
     public static NativeArray<Point> GetPoints(int x, int y, int z, NativeArray<Point> points, int chunkSize)
