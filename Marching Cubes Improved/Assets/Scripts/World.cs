@@ -20,6 +20,7 @@ public class World : MonoBehaviour
     private Bounds worldBounds;
 
     public DensityGenerator densityGenerator;
+    public bool useJobs;
 
     private void Awake()
     {
@@ -99,7 +100,7 @@ public class World : MonoBehaviour
 
         for (int i = 0; i < 8; i++)
         {
-            Vector3Int chunkPos = (dp - LookupTables.CubePoints[i]).FloorToNearestX(chunkSize);
+            Vector3Int chunkPos = (dp - MarchingCubes.CubePoints[i]).FloorToNearestX(chunkSize);
 
             if (i != 0 && chunkPos == lastChunkPos)
             {

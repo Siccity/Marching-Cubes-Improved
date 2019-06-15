@@ -564,14 +564,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chunkSize: 16
-  worldWidth: 2
-  worldHeight: 2
-  worldDepth: 2
+  worldWidth: 1
+  worldHeight: 1
+  worldDepth: 1
   isolevel: 0.5
   seed: 3081
   chunkPrefab: {fileID: 7489232383384105734, guid: 58c1dc75b64dbec41a572954c3bcd523,
     type: 3}
-  useJobs: 0
+  useJobs: 1
 --- !u!1 &1745965427
 GameObject:
   m_ObjectHideFlags: 0

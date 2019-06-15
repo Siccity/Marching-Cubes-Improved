@@ -3,32 +3,21 @@ using UnityEngine;
 
 public static class MarchingCubesHelperFunctions
 {
-    public static Vector3Int Convert1Dto3D(int i, int maxWidth, int maxHeight)
+    public static Vector3 Convert1Dto3D(int i, int maxWidth, int maxHeight)
     {
         int x = i % maxWidth;
         int y = i / maxWidth % maxHeight;
         int z = i / (maxHeight * maxWidth);
-        return new Vector3Int(x, y, z);
+        return new Vector3(x, y, z);
     }
 
-    public static int Convert3Dto1D(Vector3Int vec, int xMax, int yMax)
+    public static int Convert3Dto1D(Vector3 vec, int xMax, int yMax)
     {
-        return Convert3Dto1D(vec.x, vec.y, vec.z, xMax, yMax);
+        return (int)((vec.z * xMax * yMax) + (vec.y * xMax) + vec.x);
     }
 
-    public static int Convert3Dto1D(int x, int y, int z, int xMax, int yMax)
+    public static Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2, float isolevel)
     {
-        return (int)((z * xMax * yMax) + (y * xMax) + x);
-    }
-
-    public static Vector3 VertexInterpolate(Point point1, Point point2, float isolevel)
-    {
-        float v1 = point1.density;
-        float v2 = point2.density;
-
-        Vector3 p1 = point1.localPosition;
-        Vector3 p2 = point2.localPosition;
-
         if (Utils.Abs(isolevel - v1) < 0.000001f)
         {
             return p1;
@@ -60,7 +49,7 @@ public static class MarchingCubesHelperFunctions
                 Point point1 = points[LookupTables.EdgeIndexTable[i][0]];
                 Point point2 = points[LookupTables.EdgeIndexTable[i][1]];
 
-                vertexList[i] = VertexInterpolate(point1, point2, isolevel);
+                vertexList[i] = VertexInterpolate(point1.localPosition, point2.localPosition, point1.density, point2.density, isolevel);
             }
         }
 
@@ -112,7 +101,7 @@ public static class MarchingCubesHelperFunctions
 
     public static NativeArray<Point> GetPoints(int x, int y, int z, NativeArray<Point> points, int chunkSize)
     {
-        int index = Convert3Dto1D(x, y, z, chunkSize + 1, chunkSize + 1);
+        int index = Convert3Dto1D(new Vector3(x, y, z), chunkSize, chunkSize);
         return GetPoints(index, points, chunkSize);
     }
 
@@ -120,24 +109,19 @@ public static class MarchingCubesHelperFunctions
     {
         NativeArray<Point> cubePoints = new NativeArray<Point>(8, Allocator.Temp);
 
-        if (!i.IsBetween(0, points.Length - 1))
-        {
-            return cubePoints;
-        }
+        Vector3 startPos = Convert1Dto3D(i, chunkSize, chunkSize);
 
-        Vector3Int startPos = Convert1Dto3D(i, chunkSize + 1, chunkSize + 1);
         for (int j = 0; j < 8; j++)
         {
-            Vector3Int pos = startPos + LookupTables.CubePoints[j];
-            if (!pos.IsBetween(Vector3Int.zero, Vector3Int.one * chunkSize))
-            {
-                continue;
-            }
+            Vector3 pos = startPos + MarchingCubes.CubePoints[j];
 
-            int newIndex = Convert3Dto1D(pos, chunkSize + 1, chunkSize + 1);
-            if (newIndex.IsBetween(0, points.Length - 1))
+            if (pos.x < chunkSize + 1 && pos.y < chunkSize + 1 && pos.z < chunkSize + 1)
             {
-                cubePoints[j] = points[newIndex];
+                int newIndex = Convert3Dto1D(pos, chunkSize + 1, chunkSize + 1);
+
+                Point p = points[newIndex];
+
+                cubePoints[j] = p;
             }
         }
 
