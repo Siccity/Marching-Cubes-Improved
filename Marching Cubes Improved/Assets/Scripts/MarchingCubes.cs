@@ -147,8 +147,16 @@ public class MarchingCubes
     {
         for (int i = 0; i < 8; i++)
         {
-            Point p = points[x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]];
-            _initPoints[i] = p;
+            int newX = x + CubePointsX[i];
+            int newY = y + CubePointsY[i];
+            int newZ = z + CubePointsZ[i];
+
+            // If sometime in the future the chunk edge's will be different lengths (e.g. 16/256/16), newX and newZ may have to switch places
+            if (newX.IsBetween(0, points.GetLength(0)-1) && newY.IsBetween(0, points.GetLength(1)-1) && newZ.IsBetween(0, points.GetLength(2)-1))
+            {
+                Point p = points[x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]];
+                _initPoints[i] = p;
+            }
         }
 
         return _initPoints;
