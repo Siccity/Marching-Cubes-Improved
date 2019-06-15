@@ -30,12 +30,9 @@ public class GetPointsTest
         mc = new MarchingCubes(points, 0.5f, 0);
     }
 
-    [Test]
-    public void GetPointsTest1()
+    public void TestGetPoint(Vector3Int position)
     {
         NativeArray<Point> allPoints = points.ToNativeArray();
-
-        Vector3Int position = new Vector3Int(0, 0, 0);
 
         NativeArray<Point> actual = MarchingCubesHelperFunctions.GetPoints(position.x, position.y, position.z, allPoints, chunkSize);
         allPoints.Dispose();
@@ -48,68 +45,38 @@ public class GetPointsTest
         }
 
         actual.Dispose();
+    }
+
+    [Test]
+    public void GetPointsTest1()
+    {
+        TestGetPoint(new Vector3Int(0, 0, 0));
     }
 
     [Test]
     public void GetPointsTest2()
     {
-        NativeArray<Point> allPoints = points.ToNativeArray();
-
-        Vector3Int position = new Vector3Int(5, 5, 5);
-
-        NativeArray<Point> actual = MarchingCubesHelperFunctions.GetPoints(position.x, position.y, position.z, allPoints, chunkSize);
-        allPoints.Dispose();
-
-        Point[] target = mc.GetPoints(position.x, position.y, position.z, points);
-
-        for (int i = 0; i < 8; i++)
-        {
-            Assert.AreEqual(target[i], actual[i]);
-        }
-
-        actual.Dispose();
+        TestGetPoint(new Vector3Int(5, 5, 5));
     }
 
     [Test]
     public void GetPointsTest3()
     {
-        NativeArray<Point> allPoints = points.ToNativeArray();
-
-        Vector3Int position = new Vector3Int(chunkSize, chunkSize, chunkSize);
-
-        NativeArray<Point> actual = MarchingCubesHelperFunctions.GetPoints(position.x, position.y, position.z, allPoints, chunkSize);
-        allPoints.Dispose();
-
-        Point[] target = mc.GetPoints(position.x, position.y, position.z, points);
-
-        for (int i = 0; i < 8; i++)
-        {
-            if(actual[i].initialized)
-                Assert.AreEqual(target[i], actual[i]);
-        }
-
-        actual.Dispose();
+        TestGetPoint(new Vector3Int(chunkSize, chunkSize, chunkSize));
     }
 
-    //TODO: Implement this test
+    [Test]
+    public void GetPointsTest4(){
+        TestGetPoint(new Vector3Int(chunkSize + 1, chunkSize + 1, chunkSize + 1));
+    }
 
-    //[Test]
-    //public void GetPointsTest4()
-    //{
-    //    NativeArray<Point> allPoints = points.ToNativeArray(chunkSize);
+    [Test]
+    public void GetPointsTest5(){
+        TestGetPoint(new Vector3Int(-3, -3, -3));
+    }
 
-    //    Vector3Int position = new Vector3Int(chunkSize+1, chunkSize+1, chunkSize+1);
-
-    //    NativeArray<Point> actual = MarchingCubesHelperFunctions.GetPoints(position.x, position.y, position.z, allPoints, chunkSize);
-    //    allPoints.Dispose();
-
-    //    Point[] target = MarchingCubes.GetPoints(position.x, position.y, position.z, points);
-
-    //    for (int i = 0; i < 8; i++)
-    //    {
-    //        Assert.AreEqual(target[i], actual[i]);
-    //    }
-
-    //    actual.Dispose();
-    //}
+    [Test]
+    public void GetPointsTest6(){
+        TestGetPoint(new Vector3Int(chunkSize - 1, chunkSize - 1, chunkSize - 1));
+    }
 }
