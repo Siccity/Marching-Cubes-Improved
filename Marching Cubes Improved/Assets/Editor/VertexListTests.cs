@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using Unity.Collections;
 using UnityEngine;
@@ -7,7 +8,8 @@ public class VertexListTests
     private int chunkSize = 16;
     private Point[,,] points;
     private DensityGenerator dg;
-    private MarchingCubes mc;
+    private float iso;
+
 
     [SetUp]
     public void Setup()
@@ -27,56 +29,85 @@ public class VertexListTests
                 }
             }
         }
-        mc = new MarchingCubes(points, 0.5f, 0);
     }
 
     public void TestVertexList(int x, int y, int z)
     {
-        Point[] targetPoints = mc.GetPoints(x, y, z, points);
-        NativeArray<Point> nativeCubePoints = targetPoints.ToNativeArray();
-        
-        int cubeIndex = mc.CalculateCubeIndex(targetPoints, mc._isolevel);
+        NativeArray<Point> nativePoints = points.ToNativeArray();
+        NativeArray<Point> cubePoints = MarchingCubesHelperFunctions.GetPoints(x, y, z, nativePoints, chunkSize);
+
+        int cubeIndex = MarchingCubesHelperFunctions.CalculateCubeIndex(cubePoints, iso);
         int edgeIndex = LookupTables.EdgeTable[cubeIndex];
 
-        Vector3[] target = mc.GenerateVertexList(targetPoints, edgeIndex);
-        NativeArray<Vector3> actual = MarchingCubesHelperFunctions.GenerateVertexList(nativeCubePoints, edgeIndex, mc._isolevel);
+        NativeArray<Vector3> target = GenerateVertexList(cubePoints, edgeIndex);
+        NativeArray<Vector3> actual = MarchingCubesHelperFunctions.GenerateVertexList(cubePoints, edgeIndex, iso);
 
         for (int i = 0; i < target.Length; i++)
         {
             Assert.AreEqual(target[i], actual[i]);
         }
 
+        nativePoints.Dispose();
+        cubePoints.Dispose();
+
+        target.Dispose();
         actual.Dispose();
-        nativeCubePoints.Dispose();
+    }
+
+    private NativeArray<Vector3> GenerateVertexList(NativeArray<Point> targetPoints, int edgeIndex)
+    {
+        NativeArray<Vector3> vertexList = new NativeArray<Vector3>(12, Allocator.Temp);
+        for (int i = 0; i < 12; i++)
+        {
+            if ((edgeIndex & (1 << i)) != 0)
+            {
+                int[] edgePair = LookupTables.EdgeIndexTable[i];
+                int edge1 = edgePair[0];
+                int edge2 = edgePair[1];
+
+                Point point1 = targetPoints[edge1];
+                Point point2 = targetPoints[edge2];
+
+                vertexList[i] = MarchingCubesHelperFunctions.VertexInterpolate(point1.localPosition, point2.localPosition, point1.density, point2.density, iso);
+            }
+        }
+
+        return vertexList;
     }
 
     [Test]
-    public void VertexListTest1(){
+    public void VertexListTest1()
+    {
         TestVertexList(0, 0, 0);
     }
 
     [Test]
-    public void VertexListTest2(){
+    public void VertexListTest2()
+    {
         TestVertexList(4, 8, 8);
     }
 
     [Test]
-    public void VertexListTest3(){
+    public void VertexListTest3()
+    {
         TestVertexList(3, 7, 5);
     }
 
     [Test]
-    public void VertexListTest4(){
+    public void VertexListTest4()
+    {
         TestVertexList(chunkSize, chunkSize, chunkSize);
     }
 
     [Test]
-    public void VertexListTest5(){
+    public void VertexListTest5()
+    {
         TestVertexList(-7, -4, -9);
     }
 
     [Test]
-    public void VertexListTest6(){
+    public void VertexListTest6()
+    {
         TestVertexList(100, 100, 100);
     }
 }

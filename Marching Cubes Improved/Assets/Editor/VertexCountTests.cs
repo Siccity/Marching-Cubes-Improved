@@ -7,7 +7,7 @@ public class VertexCountTests
     private int chunkSize = 16;
     private Point[,,] points;
     private DensityGenerator dg;
-    private MarchingCubes mc;
+    private float iso = 0.5f;
 
     [SetUp]
     public void Setup()
@@ -27,19 +27,28 @@ public class VertexCountTests
                 }
             }
         }
-        mc = new MarchingCubes(points, 0.5f, 0);
+    }
+
+    int CalculateVertexCount(NativeArray<int> cubeIndices){
+        int vertexCount = 0;
+        for (int i = 0; i < cubeIndices.Length; i++)
+        {
+            vertexCount += LookupTables.TriangleTable[cubeIndices[i]].Length;
+        }
+        return vertexCount;
     }
 
     [Test]
     public void VertexCountTest1(){
-        int[,,] targetCubeIndices = mc.GenerateCubeIndexes(points);
-        int targetVertexCount = mc.GenerateVertexCount(targetCubeIndices);
+        var allPoints = points.ToNativeArray();
+        var targetCubeIndices = MarchingCubesHelperFunctions.GenerateCubeIndices(allPoints, chunkSize, iso);
+        int targetVertexCount = CalculateVertexCount(targetCubeIndices);
 
-        NativeArray<int> nativeTargetCubeIndices = targetCubeIndices.ToNativeArray();
-        int actualVertexCount = MarchingCubesHelperFunctions.GenerateVertexCount(nativeTargetCubeIndices);
+        int actualVertexCount = MarchingCubesHelperFunctions.GenerateVertexCount(targetCubeIndices);
 
         Assert.AreEqual(targetVertexCount, actualVertexCount);
 
-        nativeTargetCubeIndices.Dispose();
+        allPoints.Dispose();
+        targetCubeIndices.Dispose();
     }
 }

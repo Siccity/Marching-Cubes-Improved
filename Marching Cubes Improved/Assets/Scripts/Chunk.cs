@@ -12,7 +12,6 @@ public class Chunk : MonoBehaviour
     private float _isolevel;
     private int _seed;
 
-    private MarchingCubes _marchingCubes;
     private MeshFilter _meshFilter;
     private MeshCollider _meshCollider;
     private DensityGenerator _densityGenerator;
@@ -68,21 +67,11 @@ public class Chunk : MonoBehaviour
                 }
             }
         }
-
-        _marchingCubes = new MarchingCubes(points, _isolevel, _seed);
     }
 
     public void Generate()
     {
-        Mesh mesh;
-        if (_world.useJobs)
-        {
-            mesh = CreateMeshWithJobs();
-        }
-        else
-        {
-            mesh = _marchingCubes.CreateMeshData(points);
-        }
+        Mesh mesh = CreateMeshWithJobs();
 
         _meshFilter.sharedMesh = mesh;
         //_meshCollider.sharedMesh = mesh;
@@ -189,7 +178,7 @@ public class Chunk : MonoBehaviour
         Point[] cubePoints = new Point[8];
         for (int i = 0; i < 8; i++)
         {
-            cubePoints[i] = points[x + MarchingCubes.CubePointsX[i], y + MarchingCubes.CubePointsY[i], z + MarchingCubes.CubePointsZ[i]];
+            cubePoints[i] = points[x + LookupTables.CubePoints[i].x, y + LookupTables.CubePoints[i].y, z + LookupTables.CubePoints[i].z];
         }
 
         return cubePoints;

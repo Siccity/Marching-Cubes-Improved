@@ -7,7 +7,7 @@ public class CubeIndexTests
     private int chunkSize = 16;
     private Point[,,] points;
     private DensityGenerator dg;
-    private MarchingCubes mc;
+    private float iso;
 
     [SetUp]
     public void Setup()
@@ -27,18 +27,29 @@ public class CubeIndexTests
                 }
             }
         }
-        mc = new MarchingCubes(points, 0.5f, 0);
+    }
+
+    int CalculateCubeIndex(NativeArray<Point> points, float iso){
+        int cubeIndex = 0;
+        for (int i = 0; i < 8; i++)
+        {
+            if(points[i].density < iso){
+                cubeIndex |= 1 << i;
+            }
+        }
+        return cubeIndex;
     }
 
     void CubeIndexTest(int x, int y, int z)
     {
-        Point[] points = mc.GetPoints(x, y, z, this.points);
-        int target = mc.CalculateCubeIndex(points, mc._isolevel);
-
         NativeArray<Point> nativePoints = points.ToNativeArray();
-        int actual = MarchingCubesHelperFunctions.CalculateCubeIndex(nativePoints, mc._isolevel);
+
+        int target = CalculateCubeIndex(nativePoints, iso);
+        int actual = MarchingCubesHelperFunctions.CalculateCubeIndex(nativePoints, iso);
 
         Assert.AreEqual(target, actual);
+
+        nativePoints.Dispose();
     }
 
     [Test]
@@ -62,14 +73,17 @@ public class CubeIndexTests
     [Test]
     public void CubeIndexTest4()
     {
-        float iso = mc._isolevel;
-
-        int[,,] targetIndices = mc.GenerateCubeIndexes(points);
-
         NativeArray<Point> allPoints = points.ToNativeArray();
 
-        NativeArray<int> target = targetIndices.ToNativeArray();
         NativeArray<int> actual = MarchingCubesHelperFunctions.GenerateCubeIndices(allPoints, chunkSize, iso);
+
+        int[] target = new int[chunkSize * chunkSize * chunkSize];
+        for (int i = 0; i < target.Length; i++)
+        {
+            Vector3Int p = MarchingCubesHelperFunctions.Convert1Dto3D(i, chunkSize, chunkSize);
+            var cubePoints = MarchingCubesHelperFunctions.GetPoints(p, allPoints, chunkSize);
+            target[i] = CalculateCubeIndex(cubePoints, iso);
+        }
 
         for (int i = 0; i < target.Length; i++)
         {
@@ -81,7 +95,6 @@ public class CubeIndexTests
         
         allPoints.Dispose();
 
-        target.Dispose();
         actual.Dispose();
     }
 }

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Unity.Collections;
 using UnityEngine;
 
@@ -7,7 +8,6 @@ public class GetPointsTest
     private int chunkSize = 16;
     private Point[,,] points;
     private DensityGenerator dg;
-    private MarchingCubes mc;
 
     [SetUp]
     public void Setup()
@@ -27,7 +27,6 @@ public class GetPointsTest
                 }
             }
         }
-        mc = new MarchingCubes(points, 0.5f, 0);
     }
 
     public void TestGetPoint(Vector3Int position)
@@ -37,7 +36,7 @@ public class GetPointsTest
         NativeArray<Point> actual = MarchingCubesHelperFunctions.GetPoints(position.x, position.y, position.z, allPoints, chunkSize);
         allPoints.Dispose();
 
-        Point[] target = mc.GetPoints(position.x, position.y, position.z, points);
+        Point[] target = GetPoints(position, points);
 
         for (int i = 0; i < 8; i++)
         {
@@ -45,6 +44,19 @@ public class GetPointsTest
         }
 
         actual.Dispose();
+    }
+
+    private Point[] GetPoints(Vector3Int position, Point[,,] points)
+    {
+        Point[] output = new Point[8];
+        for (int i = 0; i < 8; i++)
+        {
+            Vector3Int newPosition = position + LookupTables.CubePoints[i];
+
+            if(newPosition.IsBetween(Vector3Int.zero, Vector3Int.one*(chunkSize)))
+                output[i] = points[newPosition.x, newPosition.y, newPosition.z];
+        }
+        return output;
     }
 
     [Test]
