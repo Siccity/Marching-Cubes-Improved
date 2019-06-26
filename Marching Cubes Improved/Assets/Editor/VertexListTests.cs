@@ -1,4 +1,3 @@
-using System;
 using NUnit.Framework;
 using Unity.Collections;
 using UnityEngine;
@@ -8,7 +7,7 @@ public class VertexListTests
     private int chunkSize = 16;
     private Point[,,] points;
     private DensityGenerator dg;
-    private float iso;
+    private float iso = 0.5f;
 
 
     [SetUp]
@@ -34,7 +33,7 @@ public class VertexListTests
     public void TestVertexList(int x, int y, int z)
     {
         NativeArray<Point> nativePoints = points.ToNativeArray();
-        NativeArray<Point> cubePoints = MarchingCubesHelperFunctions.GetPoints(x, y, z, nativePoints, chunkSize);
+        NativeArray<Point> cubePoints = MarchingCubesHelperFunctions.GetCorners(x, y, z, nativePoints, chunkSize);
 
         int cubeIndex = MarchingCubesHelperFunctions.CalculateCubeIndex(cubePoints, iso);
         int edgeIndex = LookupTables.EdgeTable[cubeIndex];
@@ -109,5 +108,11 @@ public class VertexListTests
     public void VertexListTest6()
     {
         TestVertexList(100, 100, 100);
+    }
+
+    [Test]
+    public void VertexListTest7()
+    {
+        TestVertexList(chunkSize+1, chunkSize+1, chunkSize+1);
     }
 }

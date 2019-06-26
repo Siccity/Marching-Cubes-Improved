@@ -11,9 +11,9 @@ public static class MarchingCubesHelperFunctions
         return new Vector3Int(x, y, z);
     }
 
-    public static int Convert3Dto1D(Vector3Int vec, int xMax, int yMax)
+    public static int Convert3Dto1D(Vector3Int point, int xMax, int yMax)
     {
-        return Convert3Dto1D(vec.x, vec.y, vec.z, xMax, yMax);
+        return Convert3Dto1D(point.x, point.y, point.z, xMax, yMax);
     }
 
     public static int Convert3Dto1D(int x, int y, int z, int xMax, int yMax)
@@ -81,7 +81,7 @@ public static class MarchingCubesHelperFunctions
         for (int i = 0; i < chunkSize * chunkSize * chunkSize; i++)
         {
             Vector3Int pos = Convert1Dto3D(i, chunkSize, chunkSize);
-            NativeArray<Point> cubePoints = GetPoints(pos, points, chunkSize);
+            NativeArray<Point> cubePoints = GetCorners(pos, points, chunkSize);
             int cubeIndex = CalculateCubeIndex(cubePoints, isolevel);
             cubeIndices[i] = cubeIndex;
             cubePoints.Dispose();
@@ -105,44 +105,43 @@ public static class MarchingCubesHelperFunctions
         return cubeIndex;
     }
 
-    public static NativeArray<Point> GetPoints(Vector3Int origin, NativeArray<Point> points, int chunkSize)
+    public static NativeArray<Point> GetCorners(int i, NativeArray<Point> points, int chunkSize)
     {
-        int index = Convert3Dto1D(origin, chunkSize + 1, chunkSize + 1);
-        return GetPoints(index, points, chunkSize);
+        Vector3Int origin = Convert1Dto3D(i, chunkSize + 1, chunkSize + 1);
+        return GetCorners(origin, points, chunkSize);
     }
 
-    public static NativeArray<Point> GetPoints(int x, int y, int z, NativeArray<Point> points, int chunkSize)
+    public static NativeArray<Point> GetCorners(int x, int y, int z, NativeArray<Point> points, int chunkSize)
     {
-        int index = Convert3Dto1D(x, y, z, chunkSize + 1, chunkSize + 1);
-        return GetPoints(index, points, chunkSize);
+        Vector3Int origin = new Vector3Int(x, y, z);
+        return GetCorners(origin, points, chunkSize);
     }
 
-    public static NativeArray<Point> GetPoints(int i, NativeArray<Point> points, int chunkSize)
+    public static NativeArray<Point> GetCorners(Vector3Int origin, NativeArray<Point> points, int chunkSize)
     {
-        NativeArray<Point> cubePoints = new NativeArray<Point>(8, Allocator.Temp);
+        NativeArray<Point> cubeCorners = new NativeArray<Point>(8, Allocator.Temp);
 
-        if (!i.IsBetween(0, points.Length - 1))
+        if (!origin.IsBetween(Vector3Int.zero, Vector3Int.one * chunkSize))
         {
-            return cubePoints;
+            return cubeCorners;
         }
 
-        Vector3Int startPos = Convert1Dto3D(i, chunkSize + 1, chunkSize + 1);
         for (int j = 0; j < 8; j++)
         {
-            Vector3Int pos = startPos + LookupTables.CubePoints[j];
-            if (!pos.IsBetween(Vector3Int.zero, Vector3Int.one * chunkSize))
+            Vector3Int pointPosition = origin + LookupTables.CubePoints[j];
+            if (!pointPosition.IsBetween(Vector3Int.zero, Vector3Int.one * chunkSize))
             {
                 continue;
             }
 
-            int newIndex = Convert3Dto1D(pos, chunkSize + 1, chunkSize + 1);
+            int newIndex = Convert3Dto1D(pointPosition, chunkSize + 1, chunkSize + 1);
             if (newIndex.IsBetween(0, points.Length - 1))
             {
-                cubePoints[j] = points[newIndex];
+                cubeCorners[j] = points[newIndex];
             }
         }
 
-        return cubePoints;
+        return cubeCorners;
     }
 
     public static void March(NativeArray<Point> points, int cubeIndex, ref int vertexIndex, ref NativeArray<Vector3> vertices, float isolevel)
@@ -151,9 +150,15 @@ public static class MarchingCubesHelperFunctions
 
         NativeArray<Vector3> vertexList = GenerateVertexList(points, edgeIndex, isolevel);
 
-        for (int i = 0; i < LookupTables.TriangleTable[cubeIndex].Length; i++)
+        for (int i = 0; i < LookupTables.TriangleTable[cubeIndex].Length; i += 3)
         {
-            vertices[vertexIndex] = vertexList[LookupTables.TriangleTable[cubeIndex][i]];
+            vertices[vertexIndex] = vertexList[LookupTables.TriangleTable[cubeIndex][i + 0]];
+            vertexIndex++;
+
+            vertices[vertexIndex] = vertexList[LookupTables.TriangleTable[cubeIndex][i + 1]];
+            vertexIndex++;
+
+            vertices[vertexIndex] = vertexList[LookupTables.TriangleTable[cubeIndex][i + 2]];
             vertexIndex++;
         }
 
@@ -180,7 +185,9 @@ public static class MarchingCubesHelperFunctions
             if (cubeIndex == 0 || cubeIndex == 255)
                 continue;
 
-            NativeArray<Point> cubePoints = GetPoints(i, points, chunkSize);
+            Vector3Int origin = Convert1Dto3D(i, chunkSize, chunkSize);
+            NativeArray<Point> cubePoints = GetCorners(origin, points, chunkSize);
+
             March(cubePoints, cubeIndex, ref vertexIndex, ref vertices, isolevel);
             cubePoints.Dispose();
         }

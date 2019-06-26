@@ -7,7 +7,7 @@ public class CubeIndexTests
     private int chunkSize = 16;
     private Point[,,] points;
     private DensityGenerator dg;
-    private float iso;
+    private float iso = 0.5f;
 
     [SetUp]
     public void Setup()
@@ -81,7 +81,7 @@ public class CubeIndexTests
         for (int i = 0; i < target.Length; i++)
         {
             Vector3Int p = MarchingCubesHelperFunctions.Convert1Dto3D(i, chunkSize, chunkSize);
-            var cubePoints = MarchingCubesHelperFunctions.GetPoints(p, allPoints, chunkSize);
+            var cubePoints = MarchingCubesHelperFunctions.GetCorners(p, allPoints, chunkSize);
             target[i] = CalculateCubeIndex(cubePoints, iso);
         }
 

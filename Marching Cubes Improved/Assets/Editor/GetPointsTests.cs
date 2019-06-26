@@ -33,7 +33,7 @@ public class GetPointsTest
     {
         NativeArray<Point> allPoints = points.ToNativeArray();
 
-        NativeArray<Point> actual = MarchingCubesHelperFunctions.GetPoints(position.x, position.y, position.z, allPoints, chunkSize);
+        NativeArray<Point> actual = MarchingCubesHelperFunctions.GetCorners(position.x, position.y, position.z, allPoints, chunkSize);
         allPoints.Dispose();
 
         Point[] target = GetPoints(position, points);
