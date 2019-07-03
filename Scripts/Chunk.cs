@@ -30,7 +30,7 @@ public class Chunk : MonoBehaviour {
 		}
 	}
 
-	public void Initialize(World world, int chunkSize, Vector3Int position) {
+	public void Initialize(Terrain world, int chunkSize, Vector3Int position) {
 		this.chunkSize = chunkSize;
 		this.position = position;
 		_isolevel = world.isolevel;

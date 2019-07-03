@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class World : MonoBehaviour {
+public class Terrain : MonoBehaviour {
 	public int chunkSize = 8;
 
 	public int worldWidth = 5;
