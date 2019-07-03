@@ -43,7 +43,8 @@ namespace MarchingCubes {
 
 			Ray ray = new Ray(startP, direction);
 
-			if (Physics.Raycast(ray, out RaycastHit hit, maxReachDistance)) {
+			RaycastHit hit;
+			if (Physics.Raycast(ray, out hit, maxReachDistance)) {
 				Vector3 hitPoint = hit.point;
 
 				if (addTerrain) {
