@@ -1,23 +1,27 @@
 ﻿using UnityEngine;
 
 namespace MarchingCubes {
+	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 	public class Chunk : MonoBehaviour {
 		[HideInInspector] public bool readyForUpdate;
 		[HideInInspector] public Point[, , ] points;
 		[HideInInspector] public int chunkSize;
 		[HideInInspector] public Vector3Int position;
+		public MeshFilter meshFilter;
+		public MeshRenderer meshRenderer;
+		public MeshCollider meshCollider;
 
-		private float _isolevel;
-		private int _seed;
+		private float isolevel;
+		private int seed;
 
-		private MarchingCubes _marchingCubes;
-		private MeshFilter _meshFilter;
-		private MeshCollider _meshCollider;
-		private DensityGenerator _densityGenerator;
+		private MarchingCubes marchingCubes;
+
+		private DensityGenerator densityGenerator;
 
 		private void Awake() {
-			_meshFilter = GetComponent<MeshFilter>();
-			_meshCollider = GetComponent<MeshCollider>();
+			meshFilter = GetComponent<MeshFilter>();
+			meshRenderer = GetComponent<MeshRenderer>();
+			meshCollider = GetComponent<MeshCollider>();
 		}
 
 		private void Start() {
@@ -34,9 +38,9 @@ namespace MarchingCubes {
 		public void Initialize(Terrain world, int chunkSize, Vector3Int position) {
 			this.chunkSize = chunkSize;
 			this.position = position;
-			_isolevel = world.isolevel;
+			isolevel = world.isolevel;
 
-			_densityGenerator = world.densityGenerator;
+			densityGenerator = world.densityGenerator;
 
 			int worldPosX = position.x;
 			int worldPosY = position.y;
@@ -44,15 +48,15 @@ namespace MarchingCubes {
 
 			points = new Point[chunkSize + 1, chunkSize + 1, chunkSize + 1];
 
-			_seed = world.seed;
-			_marchingCubes = new MarchingCubes(points, _isolevel, _seed);
+			seed = world.seed;
+			marchingCubes = new MarchingCubes(points, isolevel, seed);
 
 			for (int x = 0; x < points.GetLength(0); x++) {
 				for (int y = 0; y < points.GetLength(1); y++) {
 					for (int z = 0; z < points.GetLength(2); z++) {
 						points[x, y, z] = new Point(
 							new Vector3Int(x, y, z),
-							_densityGenerator.CalculateDensity(x + worldPosX, y + worldPosY, z + worldPosZ)
+							densityGenerator.CalculateDensity(x + worldPosX, y + worldPosY, z + worldPosZ)
 						);
 					}
 				}
@@ -60,10 +64,10 @@ namespace MarchingCubes {
 		}
 
 		public void Generate() {
-			Mesh mesh = _marchingCubes.CreateMeshData(points);
+			Mesh mesh = marchingCubes.CreateMeshData(points);
 
-			_meshFilter.sharedMesh = mesh;
-			_meshCollider.sharedMesh = mesh;
+			meshFilter.sharedMesh = mesh;
+			meshCollider.sharedMesh = mesh;
 		}
 
 		public Point GetPoint(int x, int y, int z) {

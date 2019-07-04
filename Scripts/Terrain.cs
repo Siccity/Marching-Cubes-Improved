@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace MarchingCubes {
 	public class Terrain : MonoBehaviour {
+		public Material material;
 		public int chunkSize = 8;
 
 		public int worldWidth = 5;
@@ -12,8 +13,6 @@ namespace MarchingCubes {
 		public float isolevel;
 
 		public int seed;
-
-		public GameObject chunkPrefab;
 
 		public Dictionary<Vector3Int, Chunk> chunks;
 
@@ -134,7 +133,9 @@ namespace MarchingCubes {
 		private void CreateChunk(int x, int y, int z) {
 			Vector3Int position = new Vector3Int(x, y, z);
 
-			Chunk chunk = Instantiate(chunkPrefab, position, Quaternion.identity).GetComponent<Chunk>();
+			Chunk chunk = new GameObject("Chunk").AddComponent<Chunk>();
+			chunk.meshRenderer.material = material;
+			chunk.transform.position = position;
 			chunk.Initialize(this, chunkSize, position);
 			chunks.Add(position, chunk);
 		}
