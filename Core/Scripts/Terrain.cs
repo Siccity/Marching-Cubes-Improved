@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MarchingCubes {
@@ -11,36 +12,57 @@ namespace MarchingCubes {
 		public int worldDepth = 5;
 
 		public float isolevel;
-
 		public int seed;
 
 		public Dictionary<Vector3Int, Chunk> chunks;
 
 		private Bounds worldBounds;
 
-		public DensityGenerator densityGenerator;
-
-		private void Awake() {
-			densityGenerator = new DensityGenerator(seed);
-		}
-
 		private void OnDrawGizmos() {
 			Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
+		}
+
+		public void Generate(Func<Vector3Int, float> densityFunction) {
+			ValidateChunks();
+			// todo
+		}
+
+		public void Union(Func<Vector3Int, float> densityFunction) {
+			ValidateChunks();
+			// todo
+		}
+
+		public void Subtract(Func<Vector3Int, float> densityFunction) {
+			ValidateChunks();
+			// todo
+		}
+
+		public void Intersection(Func<Vector3Int, float> densityFunction) {
+			ValidateChunks();
+			// todo
+		}
+
+		private void ValidateChunks() {
+			if (chunks == null) {
+				CreateChunks();
+			}
 		}
 
 		private void Start() {
 			worldBounds = new Bounds();
 			UpdateBounds();
 
-			chunks = new Dictionary<Vector3Int, Chunk>(worldWidth * worldHeight * worldDepth);;
+			chunks = new Dictionary<Vector3Int, Chunk>(worldWidth * worldHeight * worldDepth);
 			CreateChunks();
 		}
 
 		private void CreateChunks() {
-			for (int x = 0; x < worldWidth; x++) {
-				for (int y = 0; y < worldHeight; y++) {
-					for (int z = 0; z < worldDepth; z++) {
-						CreateChunk(x * chunkSize, y * chunkSize, z * chunkSize);
+			chunks = new Dictionary<Vector3Int, Chunk>(worldWidth * worldHeight * worldDepth);
+			Vector3Int pos = new Vector3Int(0, 0, 0);
+			for (pos.x = 0; pos.x < worldWidth; pos.x++) {
+				for (pos.y = 0; pos.y < worldHeight; pos.y++) {
+					for (pos.z = 0; pos.z < worldDepth; pos.z++) {
+						CreateChunk(pos * chunkSize);
 					}
 				}
 			}
@@ -98,7 +120,7 @@ namespace MarchingCubes {
 
 				chunk.SetDensity(density, localPos);
 				if (setReadyForUpdate)
-					chunk.readyForUpdate = true;
+					chunk.dirty = true;
 			}
 		}
 
@@ -130,9 +152,7 @@ namespace MarchingCubes {
 			return worldBounds.Contains(point);
 		}
 
-		private void CreateChunk(int x, int y, int z) {
-			Vector3Int position = new Vector3Int(x, y, z);
-
+		private void CreateChunk(Vector3Int position) {
 			Chunk chunk = new GameObject("Chunk").AddComponent<Chunk>();
 			chunk.meshRenderer.material = material;
 			chunk.transform.position = position;

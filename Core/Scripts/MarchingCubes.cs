@@ -15,7 +15,7 @@ namespace MarchingCubes {
 
 		private readonly Vector3 zero = Vector3.zero;
 
-		public MarchingCubes(Point[, , ] points, float isolevel, int seed) {
+		public MarchingCubes(Point[, , ] points, float isolevel) {
 			_isolevel = isolevel;
 
 			_mesh = new Mesh();

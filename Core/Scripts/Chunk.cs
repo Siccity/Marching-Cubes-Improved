@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace MarchingCubes {
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 	public class Chunk : MonoBehaviour {
-		[HideInInspector] public bool readyForUpdate;
+		[HideInInspector] public bool dirty;
 		[HideInInspector] public Point[, , ] points;
 		[HideInInspector] public int chunkSize;
 		[HideInInspector] public Vector3Int position;
@@ -12,11 +13,8 @@ namespace MarchingCubes {
 		public MeshCollider meshCollider;
 
 		private float isolevel;
-		private int seed;
 
 		private MarchingCubes marchingCubes;
-
-		private DensityGenerator densityGenerator;
 
 		private void Awake() {
 			meshFilter = GetComponent<MeshFilter>();
@@ -24,14 +22,10 @@ namespace MarchingCubes {
 			meshCollider = GetComponent<MeshCollider>();
 		}
 
-		private void Start() {
-			Generate();
-		}
-
 		private void Update() {
-			if (readyForUpdate) {
-				Generate();
-				readyForUpdate = false;
+			if (dirty) {
+				GenerateMesh();
+				dirty = false;
 			}
 		}
 
@@ -40,32 +34,70 @@ namespace MarchingCubes {
 			this.position = position;
 			isolevel = world.isolevel;
 
-			densityGenerator = world.densityGenerator;
-
 			int worldPosX = position.x;
 			int worldPosY = position.y;
 			int worldPosZ = position.z;
 
 			points = new Point[chunkSize + 1, chunkSize + 1, chunkSize + 1];
 
-			seed = world.seed;
-			marchingCubes = new MarchingCubes(points, isolevel, seed);
+			marchingCubes = new MarchingCubes(points, isolevel);
 
+			// Initialize all positions with 0 density
+			Set(pos => 0f);
+		}
+
+		public void Set(Func<Vector3Int, float> densityFunction) {
+			points = new Point[chunkSize + 1, chunkSize + 1, chunkSize + 1];
 			for (int x = 0; x < points.GetLength(0); x++) {
 				for (int y = 0; y < points.GetLength(1); y++) {
 					for (int z = 0; z < points.GetLength(2); z++) {
-						points[x, y, z] = new Point(
-							new Vector3Int(x, y, z),
-							densityGenerator.CalculateDensity(x + worldPosX, y + worldPosY, z + worldPosZ)
-						);
+						Vector3Int pos = new Vector3Int(x, y, z);
+						float density = densityFunction(pos + position);
+						points[x, y, z] = new Point(pos, density);
 					}
 				}
 			}
+			dirty = true;
 		}
 
-		public void Generate() {
-			Mesh mesh = marchingCubes.CreateMeshData(points);
+		public void Union(Func<Vector3Int, float> densityFunction) {
+			for (int x = 0; x < points.GetLength(0); x++) {
+				for (int y = 0; y < points.GetLength(1); y++) {
+					for (int z = 0; z < points.GetLength(2); z++) {
+						Vector3Int pos = new Vector3Int(x, y, z);
+						points[x, y, z].density = Mathf.Max(points[x, y, z].density, densityFunction(pos));
+					}
+				}
+			}
+			dirty = true;
+		}
 
+		public void Subtract(Func<Vector3Int, float> densityFunction) {
+			for (int x = 0; x < points.GetLength(0); x++) {
+				for (int y = 0; y < points.GetLength(1); y++) {
+					for (int z = 0; z < points.GetLength(2); z++) {
+						Vector3Int pos = new Vector3Int(x, y, z);
+						points[x, y, z].density = Mathf.Clamp01(points[x, y, z].density - densityFunction(pos));
+					}
+				}
+			}
+			dirty = true;
+		}
+
+		public void Intersection(Func<Vector3Int, float> densityFunction) {
+			for (int x = 0; x < points.GetLength(0); x++) {
+				for (int y = 0; y < points.GetLength(1); y++) {
+					for (int z = 0; z < points.GetLength(2); z++) {
+						Vector3Int pos = new Vector3Int(x, y, z);
+						points[x, y, z].density = Mathf.Min(points[x, y, z].density, densityFunction(pos));
+					}
+				}
+			}
+			dirty = true;
+		}
+
+		public void GenerateMesh() {
+			Mesh mesh = marchingCubes.CreateMeshData(points);
 			meshFilter.sharedMesh = mesh;
 			meshCollider.sharedMesh = mesh;
 		}
