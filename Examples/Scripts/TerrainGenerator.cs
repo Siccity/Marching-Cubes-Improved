@@ -3,13 +3,20 @@
 namespace MarchingCubes {
 	public class TerrainGenerator : MonoBehaviour {
 		public Terrain terrain;
-		
+		public float isolevel = 0.5f;
+
 		private void Reset() {
 			terrain = GetComponent<Terrain>();
 		}
-		
+
+		[ContextMenu("UpdateTerrain")]
+		private void UpdateTerrain() {
+			if (!terrain.initialized) terrain.Initialize(new Vector3Int(5, 5, 5), 8, isolevel);
+			terrain.GenerateNoise(0.1f);
+		}
+
 		private void Start() {
-			terrain.Initialize(new Vector3Int(5,5,5), 8);
+			if (!terrain.initialized) terrain.Initialize(new Vector3Int(5, 5, 5), 8, isolevel);
 			terrain.GenerateNoise(0.1f);
 		}
 

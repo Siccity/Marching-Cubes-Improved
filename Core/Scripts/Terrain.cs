@@ -20,27 +20,45 @@ namespace MarchingCubes {
 		}
 
 		public void Initialize(Vector3Int size, int chunkSize = 8, float isolevel = 0.5f) {
+			if (initialized) {
+				Debug.LogWarning("Terrain already initialized");
+				return;
+			}
 			CreateChunks(size, chunkSize, isolevel);
 			initialized = true;
 		}
 
-		public void Generate(Func<Vector3Int, float> densityFunction) {
-			EnumerateChunks(x => x.Set(densityFunction));
+		[ContextMenu("Deinitialize")]
+		public void Deinitialize() {
+			if (!initialized) {
+				Debug.LogWarning("Terrain not initialized");
+				return;
+			}
+			if (chunks != null) {
+				EnumerateChunks(x => DestroyImmediate(x.gameObject));
+				chunks = null;
+			}
+			initialized = false;
 		}
 
-		public void Union(Func<Vector3Int, float> densityFunction) {
-			EnumerateChunks(x => x.Union(densityFunction));
+		public void Generate(Func<Vector3Int, float> densityFunction, bool updateMesh = true) {
+			EnumerateChunks(x => { x.Set(densityFunction); if (updateMesh) x.UpdateMesh(); });
 		}
 
-		public void Subtract(Func<Vector3Int, float> densityFunction) {
-			EnumerateChunks(x => x.Subtract(densityFunction));
+		public void Union(Func<Vector3Int, float> densityFunction, bool updateMesh = true) {
+			EnumerateChunks(x => { x.Union(densityFunction); if (updateMesh) x.UpdateMesh(); });
 		}
 
-		public void Intersection(Func<Vector3Int, float> densityFunction) {
-			EnumerateChunks(x => x.Intersection(densityFunction));
+		public void Subtract(Func<Vector3Int, float> densityFunction, bool updateMesh = true) {
+			EnumerateChunks(x => { x.Subtract(densityFunction); if (updateMesh) x.UpdateMesh(); });
+		}
+
+		public void Intersection(Func<Vector3Int, float> densityFunction, bool updateMesh = true) {
+			EnumerateChunks(x => { x.Intersection(densityFunction); if (updateMesh) x.UpdateMesh(); });
 		}
 
 		private void CreateChunks(Vector3Int size, int chunkSize, float isolevel) {
+			Debug.Log("Create chunks");
 			this.chunkSize = chunkSize;
 			chunks = new Chunk[size.x, size.y, size.z];
 			for (int x = 0; x < chunks.GetLength(0); x++) {
@@ -152,9 +170,10 @@ namespace MarchingCubes {
 		}
 
 		private Chunk CreateChunk(Vector3Int position, float isolevel) {
-			Chunk chunk = new GameObject("Chunk").AddComponent<Chunk>();
+			Chunk chunk = new GameObject("Chunk (" + position.x + ", " + position.y + ", " + position.z + ")").AddComponent<Chunk>();
+			chunk.transform.parent = transform;
 			chunk.meshRenderer.material = material;
-			chunk.transform.position = position;
+			chunk.transform.localPosition = position;
 			chunk.Initialize(chunkSize, position, isolevel);
 			return chunk;
 		}
