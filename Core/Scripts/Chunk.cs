@@ -15,6 +15,8 @@ namespace MarchingCubes {
 		private float isolevel;
 
 		private MarchingCubes marchingCubes;
+		public bool initialized { get; private set; }
+		public Bounds bounds { get; private set; }
 
 		private void Awake() {
 			meshFilter = GetComponent<MeshFilter>();
@@ -23,6 +25,8 @@ namespace MarchingCubes {
 		}
 
 		private void Update() {
+			if (!initialized) return;
+
 			if (dirty) {
 				GenerateMesh();
 				dirty = false;
@@ -34,16 +38,14 @@ namespace MarchingCubes {
 			this.position = position;
 			isolevel = world.isolevel;
 
-			int worldPosX = position.x;
-			int worldPosY = position.y;
-			int worldPosZ = position.z;
-
+			bounds = new Bounds(position + (Vector3.one * chunkSize * 0.5f), Vector3Int.one * chunkSize);
 			points = new Point[chunkSize + 1, chunkSize + 1, chunkSize + 1];
 
 			marchingCubes = new MarchingCubes(points, isolevel);
 
 			// Initialize all positions with 0 density
 			Set(pos => 0f);
+			initialized = true;
 		}
 
 		public void Set(Func<Vector3Int, float> densityFunction) {

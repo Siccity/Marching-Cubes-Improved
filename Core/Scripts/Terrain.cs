@@ -10,12 +10,13 @@ namespace MarchingCubes {
 		public bool initialized { get; private set; }
 		public Chunk[, , ] chunks { get; private set; }
 		public int chunkSize { get; private set; }
-
-		private Bounds bounds;
+		public Bounds bounds { get; private set; }
 
 		private void OnDrawGizmos() {
 			if (initialized) {
-				EnumerateChunks(chunk => Gizmos.DrawWireCube(chunk.position, Vector3Int.one * chunkSize));
+				Gizmos.color = new Color(1f, 1f, 1f, 0.05f);
+				EnumerateChunks(chunk => Gizmos.DrawWireCube(chunk.bounds.center, chunk.bounds.size));
+				Gizmos.color = new Color(1f, 1f, 1f, 0.2f);
 				Gizmos.DrawWireCube(bounds.center, bounds.size);
 			}
 		}
@@ -130,7 +131,6 @@ namespace MarchingCubes {
 		}
 
 		private void UpdateBounds() {
-			bounds = new Bounds();
 			float middleX = chunks.GetLength(0) * chunkSize / 2f;
 			float middleY = chunks.GetLength(1) * chunkSize / 2f;
 			float middleZ = chunks.GetLength(2) * chunkSize / 2f;
@@ -142,8 +142,7 @@ namespace MarchingCubes {
 				chunks.GetLength(1) * chunkSize,
 				chunks.GetLength(2) * chunkSize);
 
-			bounds.center = midPos;
-			bounds.size = size;
+			bounds = new Bounds(midPos, size);
 		}
 
 		public bool IsPointInsideWorld(int x, int y, int z) {
