@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace MarchingCubes {
-	public class TerrainEditor : MonoBehaviour {
+	public class TerrainPainter : MonoBehaviour {
 		[SerializeField] private bool addTerrain = true;
 		[SerializeField] private float force = 2f;
 		[SerializeField] private float range = 2f;
