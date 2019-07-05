@@ -2,8 +2,19 @@
 
 namespace MarchingCubes {
 	public class TerrainGenerator : MonoBehaviour {
-		public void GenerateSphere() {
+		public Terrain terrain;
+		
+		private void Reset() {
+			terrain = GetComponent<Terrain>();
+		}
+		
+		private void Start() {
+			terrain.Initialize(new Vector3Int(5,5,5), 8);
+			terrain.GenerateNoise(0.1f);
+		}
 
+		public void GenerateSphere() {
+			terrain.GenerateSphere(10);
 		}
 	}
 

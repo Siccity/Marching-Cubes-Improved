@@ -67,7 +67,7 @@ namespace MarchingCubes {
 			int hitY = point.y.Round();
 			int hitZ = point.z.Round();
 
-			int intRange = range.Ceil();
+			int intRange = Mathf.CeilToInt(range);
 
 			for (int x = -intRange; x <= intRange; x++) {
 				for (int y = -intRange; y <= intRange; y++) {

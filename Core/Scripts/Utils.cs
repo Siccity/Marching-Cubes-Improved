@@ -9,20 +9,8 @@ namespace MarchingCubes {
 				return n;
 		}
 
-		public static int Abs(this int n) {
-			return (int) Abs((float) n);
-		}
-
-		public static int Floor(this float n) {
-			return (int) Mathf.Floor(n);
-		}
-
-		public static int Ceil(this float n) {
-			return Floor(n) + 1;
-		}
-
 		public static int Round(this float n) {
-			int floored = Floor(n);
+			int floored = Mathf.FloorToInt(n);
 
 			float diff = n - floored;
 			if (diff < 0.5f)
@@ -36,11 +24,11 @@ namespace MarchingCubes {
 		}
 
 		public static int FloorToNearestX(this float n, int x) {
-			return Floor(n / x) * x;
+			return Mathf.FloorToInt(n / x) * x;
 		}
 
 		public static int CeilToNearestX(this float n, int x) {
-			return Ceil(n / x) * x;
+			return Mathf.CeilToInt(n / x) * x;
 		}
 
 		public static Vector3 Abs(this Vector3 n) {
@@ -52,17 +40,17 @@ namespace MarchingCubes {
 		}
 
 		public static Vector3Int Floor(this Vector3 n) {
-			int x = Floor(n.x);
-			int y = Floor(n.y);
-			int z = Floor(n.z);
+			int x = Mathf.FloorToInt(n.x);
+			int y = Mathf.FloorToInt(n.y);
+			int z = Mathf.FloorToInt(n.z);
 
 			return new Vector3Int(x, y, z);
 		}
 
 		public static Vector3Int Ceil(this Vector3 n) {
-			int x = Ceil(n.x);
-			int y = Ceil(n.y);
-			int z = Ceil(n.z);
+			int x = Mathf.CeilToInt(n.x);
+			int y = Mathf.CeilToInt(n.y);
+			int z = Mathf.CeilToInt(n.z);
 
 			return new Vector3Int(x, y, z);
 		}
@@ -76,9 +64,9 @@ namespace MarchingCubes {
 		}
 
 		public static Vector3Int Abs(this Vector3Int n) {
-			int x = Abs(n.x);
-			int y = Abs(n.y);
-			int z = Abs(n.z);
+			int x = Mathf.Abs(n.x);
+			int y = Mathf.Abs(n.y);
+			int z = Mathf.Abs(n.z);
 
 			return new Vector3Int(x, y, z);
 		}

@@ -5,16 +5,15 @@ using UnityEngine;
 namespace MarchingCubes {
 	public class Terrain : MonoBehaviour {
 		public Material material;
-		public int chunkSize = 8;
 
-		public int worldWidth = 5;
-		public int worldHeight = 5;
-		public int worldDepth = 5;
+		private int chunkSize = 8;
 
 		public float isolevel;
 		public int seed;
 
-		public Dictionary<Vector3Int, Chunk> chunks;
+		public bool initialized { get; private set; }
+
+		public Chunk[, , ] chunks;
 
 		private Bounds worldBounds;
 
@@ -22,47 +21,50 @@ namespace MarchingCubes {
 			Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
 		}
 
+		public void Initialize(Vector3Int size, int chunkSize = 8) {
+			CreateChunks(size, chunkSize);
+			initialized = true;
+		}
+
 		public void Generate(Func<Vector3Int, float> densityFunction) {
-			ValidateChunks();
-			// todo
+			EnumerateChunks(x => x.Set(densityFunction));
 		}
 
 		public void Union(Func<Vector3Int, float> densityFunction) {
-			ValidateChunks();
-			// todo
+			EnumerateChunks(x => x.Union(densityFunction));
 		}
 
 		public void Subtract(Func<Vector3Int, float> densityFunction) {
-			ValidateChunks();
-			// todo
+			EnumerateChunks(x => x.Subtract(densityFunction));
 		}
 
 		public void Intersection(Func<Vector3Int, float> densityFunction) {
-			ValidateChunks();
-			// todo
+			EnumerateChunks(x => x.Intersection(densityFunction));
 		}
 
-		private void ValidateChunks() {
-			if (chunks == null) {
-				CreateChunks();
+		private void CreateChunks(Vector3Int size, int chunkSize) {
+			chunks = new Chunk[size.x, size.y, size.z];
+			for (int x = 0; x < chunks.GetLength(0); x++) {
+				for (int y = 0; y < chunks.GetLength(1); y++) {
+					for (int z = 0; z < chunks.GetLength(2); z++) {
+						Vector3Int pos = new Vector3Int(x, y, z) * chunkSize;
+						Chunk chunk = CreateChunk(pos);
+						chunks[x, y, z] = chunk;
+					}
+				}
 			}
-		}
-
-		private void Start() {
-			worldBounds = new Bounds();
 			UpdateBounds();
-
-			chunks = new Dictionary<Vector3Int, Chunk>(worldWidth * worldHeight * worldDepth);
-			CreateChunks();
 		}
 
-		private void CreateChunks() {
-			chunks = new Dictionary<Vector3Int, Chunk>(worldWidth * worldHeight * worldDepth);
-			Vector3Int pos = new Vector3Int(0, 0, 0);
-			for (pos.x = 0; pos.x < worldWidth; pos.x++) {
-				for (pos.y = 0; pos.y < worldHeight; pos.y++) {
-					for (pos.z = 0; pos.z < worldDepth; pos.z++) {
-						CreateChunk(pos * chunkSize);
+		private void EnumerateChunks(Action<Chunk> onChunk) {
+			if (!initialized) {
+				Debug.LogError("Terrain not initialized!");
+				return;
+			}
+			for (int x = 0; x < chunks.GetLength(0); x++) {
+				for (int y = 0; y < chunks.GetLength(1); y++) {
+					for (int z = 0; z < chunks.GetLength(2); z++) {
+						onChunk(chunks[x, y, z]);
 					}
 				}
 			}
@@ -73,11 +75,10 @@ namespace MarchingCubes {
 		}
 
 		public Chunk GetChunk(int x, int y, int z) {
-			int newX = Utils.FloorToNearestX(x, chunkSize);
-			int newY = Utils.FloorToNearestX(y, chunkSize);
-			int newZ = Utils.FloorToNearestX(z, chunkSize);
-
-			return chunks[new Vector3Int(newX, newY, newZ)];
+			x /= chunkSize;
+			y /= chunkSize;
+			z /= chunkSize;
+			return chunks[x, y, z];
 		}
 
 		public float GetDensity(int x, int y, int z) {
@@ -129,16 +130,17 @@ namespace MarchingCubes {
 		}
 
 		private void UpdateBounds() {
-			float middleX = worldWidth * chunkSize / 2f;
-			float middleY = worldHeight * chunkSize / 2f;
-			float middleZ = worldDepth * chunkSize / 2f;
+			worldBounds = new Bounds();
+			float middleX = chunks.GetLength(0) * chunkSize / 2f;
+			float middleY = chunks.GetLength(1) * chunkSize / 2f;
+			float middleZ = chunks.GetLength(2) * chunkSize / 2f;
 
 			Vector3 midPos = new Vector3(middleX, middleY, middleZ);
 
 			Vector3Int size = new Vector3Int(
-				worldWidth * chunkSize,
-				worldHeight * chunkSize,
-				worldDepth * chunkSize);
+				chunks.GetLength(0) * chunkSize,
+				chunks.GetLength(1) * chunkSize,
+				chunks.GetLength(2) * chunkSize);
 
 			worldBounds.center = midPos;
 			worldBounds.size = size;
@@ -152,12 +154,12 @@ namespace MarchingCubes {
 			return worldBounds.Contains(point);
 		}
 
-		private void CreateChunk(Vector3Int position) {
+		private Chunk CreateChunk(Vector3Int position) {
 			Chunk chunk = new GameObject("Chunk").AddComponent<Chunk>();
 			chunk.meshRenderer.material = material;
 			chunk.transform.position = position;
 			chunk.Initialize(this, chunkSize, position);
-			chunks.Add(position, chunk);
+			return chunk;
 		}
 	}
 }
