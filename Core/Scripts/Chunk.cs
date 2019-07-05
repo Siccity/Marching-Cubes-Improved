@@ -33,10 +33,10 @@ namespace MarchingCubes {
 			}
 		}
 
-		public void Initialize(Terrain world, int chunkSize, Vector3Int position) {
+		public void Initialize(int chunkSize, Vector3Int position, float isolevel) {
 			this.chunkSize = chunkSize;
 			this.position = position;
-			isolevel = world.isolevel;
+			this.isolevel = isolevel;
 
 			bounds = new Bounds(position + (Vector3.one * chunkSize * 0.5f), Vector3Int.one * chunkSize);
 			points = new Point[chunkSize + 1, chunkSize + 1, chunkSize + 1];

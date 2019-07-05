@@ -5,8 +5,6 @@ namespace MarchingCubes {
 	public class Terrain : MonoBehaviour {
 		public Material material;
 
-		public float isolevel;
-
 		public bool initialized { get; private set; }
 		public Chunk[, , ] chunks { get; private set; }
 		public int chunkSize { get; private set; }
@@ -21,8 +19,8 @@ namespace MarchingCubes {
 			}
 		}
 
-		public void Initialize(Vector3Int size, int chunkSize = 8) {
-			CreateChunks(size, chunkSize);
+		public void Initialize(Vector3Int size, int chunkSize = 8, float isolevel = 0.5f) {
+			CreateChunks(size, chunkSize, isolevel);
 			initialized = true;
 		}
 
@@ -42,14 +40,14 @@ namespace MarchingCubes {
 			EnumerateChunks(x => x.Intersection(densityFunction));
 		}
 
-		private void CreateChunks(Vector3Int size, int chunkSize) {
+		private void CreateChunks(Vector3Int size, int chunkSize, float isolevel) {
 			this.chunkSize = chunkSize;
 			chunks = new Chunk[size.x, size.y, size.z];
 			for (int x = 0; x < chunks.GetLength(0); x++) {
 				for (int y = 0; y < chunks.GetLength(1); y++) {
 					for (int z = 0; z < chunks.GetLength(2); z++) {
 						Vector3Int pos = new Vector3Int(x, y, z) * chunkSize;
-						Chunk chunk = CreateChunk(pos);
+						Chunk chunk = CreateChunk(pos, isolevel);
 						chunks[x, y, z] = chunk;
 					}
 				}
@@ -153,11 +151,11 @@ namespace MarchingCubes {
 			return bounds.Contains(point);
 		}
 
-		private Chunk CreateChunk(Vector3Int position) {
+		private Chunk CreateChunk(Vector3Int position, float isolevel) {
 			Chunk chunk = new GameObject("Chunk").AddComponent<Chunk>();
 			chunk.meshRenderer.material = material;
 			chunk.transform.position = position;
-			chunk.Initialize(this, chunkSize, position);
+			chunk.Initialize(chunkSize, position, isolevel);
 			return chunk;
 		}
 	}

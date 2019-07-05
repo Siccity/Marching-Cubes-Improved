@@ -2,43 +2,43 @@
 
 namespace MarchingCubes {
 	public class MarchingCubes {
-		private Vector3[] _vertices;
-		private int[] _triangles;
-		private float _isolevel;
+		private Vector3[] vertices;
+		private int[] triangles;
+		private float isolevel;
 
-		private int _vertexIndex;
+		private int vertexIndex;
 
-		private Vector3[] _vertexList;
-		private Point[] _initPoints;
-		private Mesh _mesh;
-		private int[, , ] _cubeIndexes;
+		private Vector3[] vertexList;
+		private Point[] initPoints;
+		private Mesh mesh;
+		private int[, , ] cubeIndexes;
 
 		private readonly Vector3 zero = Vector3.zero;
 
 		public MarchingCubes(Point[, , ] points, float isolevel) {
-			_isolevel = isolevel;
+			this.isolevel = isolevel;
 
-			_mesh = new Mesh();
+			mesh = new Mesh();
 
-			_vertexIndex = 0;
+			vertexIndex = 0;
 
-			_vertexList = new Vector3[12];
-			_initPoints = new Point[8];
-			_cubeIndexes = new int[points.GetLength(0) - 1, points.GetLength(1) - 1, points.GetLength(2) - 1];
+			vertexList = new Vector3[12];
+			initPoints = new Point[8];
+			cubeIndexes = new int[points.GetLength(0) - 1, points.GetLength(1) - 1, points.GetLength(2) - 1];
 		}
 
 		private Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2) {
-			if (Utils.Abs(_isolevel - v1) < 0.000001f) {
+			if (Utils.Abs(isolevel - v1) < 0.000001f) {
 				return p1;
 			}
-			if (Utils.Abs(_isolevel - v2) < 0.000001f) {
+			if (Utils.Abs(isolevel - v2) < 0.000001f) {
 				return p2;
 			}
 			if (Utils.Abs(v1 - v2) < 0.000001f) {
 				return p1;
 			}
 
-			float mu = (_isolevel - v1) / (v2 - v1);
+			float mu = (isolevel - v1) / (v2 - v1);
 
 			Vector3 p = p1 + mu * (p2 - p1);
 
@@ -48,22 +48,22 @@ namespace MarchingCubes {
 		private void March(Point[] points, int cubeIndex) {
 			int edgeIndex = LookupTables.EdgeTable[cubeIndex];
 
-			_vertexList = GenerateVertexList(points, edgeIndex);
+			vertexList = GenerateVertexList(points, edgeIndex);
 
 			int[] row = LookupTables.TriangleTable[cubeIndex];
 
 			for (int i = 0; i < row.Length; i += 3) {
-				_vertices[_vertexIndex] = _vertexList[row[i + 0]];
-				_triangles[_vertexIndex] = _vertexIndex;
-				_vertexIndex++;
+				vertices[vertexIndex] = vertexList[row[i + 0]];
+				triangles[vertexIndex] = vertexIndex;
+				vertexIndex++;
 
-				_vertices[_vertexIndex] = _vertexList[row[i + 1]];
-				_triangles[_vertexIndex] = _vertexIndex;
-				_vertexIndex++;
+				vertices[vertexIndex] = vertexList[row[i + 1]];
+				triangles[vertexIndex] = vertexIndex;
+				vertexIndex++;
 
-				_vertices[_vertexIndex] = _vertexList[row[i + 2]];
-				_triangles[_vertexIndex] = _vertexIndex;
-				_vertexIndex++;
+				vertices[vertexIndex] = vertexList[row[i + 2]];
+				triangles[vertexIndex] = vertexIndex;
+				vertexIndex++;
 			}
 		}
 
@@ -77,11 +77,11 @@ namespace MarchingCubes {
 					Point point1 = points[edge1];
 					Point point2 = points[edge2];
 
-					_vertexList[i] = VertexInterpolate(point1.localPosition, point2.localPosition, point1.density, point2.density);
+					vertexList[i] = VertexInterpolate(point1.localPosition, point2.localPosition, point1.density, point2.density);
 				}
 			}
 
-			return _vertexList;
+			return vertexList;
 		}
 
 		private int CalculateCubeIndex(Point[] points, float iso) {
@@ -95,20 +95,20 @@ namespace MarchingCubes {
 		}
 
 		public Mesh CreateMeshData(Point[, , ] points) {
-			_cubeIndexes = GenerateCubeIndexes(points);
-			int vertexCount = GenerateVertexCount(_cubeIndexes);
+			cubeIndexes = GenerateCubeIndexes(points);
+			int vertexCount = GenerateVertexCount(cubeIndexes);
 
 			if (vertexCount <= 0) {
 				return new Mesh();
 			}
 
-			_vertices = new Vector3[vertexCount];
-			_triangles = new int[vertexCount];
+			vertices = new Vector3[vertexCount];
+			triangles = new int[vertexCount];
 
 			for (int x = 0; x < points.GetLength(0) - 1; x++) {
 				for (int y = 0; y < points.GetLength(1) - 1; y++) {
 					for (int z = 0; z < points.GetLength(2) - 1; z++) {
-						int cubeIndex = _cubeIndexes[x, y, z];
+						int cubeIndex = cubeIndexes[x, y, z];
 						if (cubeIndex == 0 || cubeIndex == 255) continue;
 
 						March(GetPoints(x, y, z, points), cubeIndex);
@@ -116,38 +116,38 @@ namespace MarchingCubes {
 				}
 			}
 
-			_vertexIndex = 0;
+			vertexIndex = 0;
 
-			_mesh.Clear();
+			mesh.Clear();
 
-			_mesh.vertices = _vertices;
-			_mesh.SetTriangles(_triangles, 0);
-			_mesh.RecalculateNormals();
+			mesh.vertices = vertices;
+			mesh.SetTriangles(triangles, 0);
+			mesh.RecalculateNormals();
 
-			return _mesh;
+			return mesh;
 		}
 
 		private Point[] GetPoints(int x, int y, int z, Point[, , ] points) {
 			for (int i = 0; i < 8; i++) {
 				Point p = points[x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]];
-				_initPoints[i] = p;
+				initPoints[i] = p;
 			}
 
-			return _initPoints;
+			return initPoints;
 		}
 
 		private int[, , ] GenerateCubeIndexes(Point[, , ] points) {
 			for (int x = 0; x < points.GetLength(0) - 1; x++) {
 				for (int y = 0; y < points.GetLength(1) - 1; y++) {
 					for (int z = 0; z < points.GetLength(2) - 1; z++) {
-						_initPoints = GetPoints(x, y, z, points);
+						initPoints = GetPoints(x, y, z, points);
 
-						_cubeIndexes[x, y, z] = CalculateCubeIndex(_initPoints, _isolevel);
+						cubeIndexes[x, y, z] = CalculateCubeIndex(initPoints, isolevel);
 					}
 				}
 			}
 
-			return _cubeIndexes;
+			return cubeIndexes;
 		}
 
 		private int GenerateVertexCount(int[, , ] cubeIndexes) {
