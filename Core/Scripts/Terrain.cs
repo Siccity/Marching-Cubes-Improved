@@ -1,24 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace MarchingCubes {
 	public class Terrain : MonoBehaviour {
 		public Material material;
 
-		private int chunkSize = 8;
-
 		public float isolevel;
-		public int seed;
 
 		public bool initialized { get; private set; }
+		public Chunk[, , ] chunks { get; private set; }
+		public int chunkSize { get; private set; }
 
-		public Chunk[, , ] chunks;
-
-		private Bounds worldBounds;
+		private Bounds bounds;
 
 		private void OnDrawGizmos() {
-			Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
+			if (initialized) {
+				EnumerateChunks(chunk => Gizmos.DrawWireCube(chunk.position, Vector3Int.one * chunkSize));
+				Gizmos.DrawWireCube(bounds.center, bounds.size);
+			}
 		}
 
 		public void Initialize(Vector3Int size, int chunkSize = 8) {
@@ -43,6 +42,7 @@ namespace MarchingCubes {
 		}
 
 		private void CreateChunks(Vector3Int size, int chunkSize) {
+			this.chunkSize = chunkSize;
 			chunks = new Chunk[size.x, size.y, size.z];
 			for (int x = 0; x < chunks.GetLength(0); x++) {
 				for (int y = 0; y < chunks.GetLength(1); y++) {
@@ -130,7 +130,7 @@ namespace MarchingCubes {
 		}
 
 		private void UpdateBounds() {
-			worldBounds = new Bounds();
+			bounds = new Bounds();
 			float middleX = chunks.GetLength(0) * chunkSize / 2f;
 			float middleY = chunks.GetLength(1) * chunkSize / 2f;
 			float middleZ = chunks.GetLength(2) * chunkSize / 2f;
@@ -142,8 +142,8 @@ namespace MarchingCubes {
 				chunks.GetLength(1) * chunkSize,
 				chunks.GetLength(2) * chunkSize);
 
-			worldBounds.center = midPos;
-			worldBounds.size = size;
+			bounds.center = midPos;
+			bounds.size = size;
 		}
 
 		public bool IsPointInsideWorld(int x, int y, int z) {
@@ -151,7 +151,7 @@ namespace MarchingCubes {
 		}
 
 		public bool IsPointInsideWorld(Vector3Int point) {
-			return worldBounds.Contains(point);
+			return bounds.Contains(point);
 		}
 
 		private Chunk CreateChunk(Vector3Int position) {
