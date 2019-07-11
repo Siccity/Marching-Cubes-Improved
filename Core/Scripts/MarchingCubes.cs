@@ -1,33 +1,50 @@
 ﻿using UnityEngine;
 
 namespace MarchingCubes {
-	public class MarchingCubes {
-		private Vector3[] vertices;
-		private int[] triangles;
-		private float isolevel;
+	public static class MarchingCubes {
+		private static Vector3[] vertices;
+		private static int[] triangles;
 
-		private int vertexIndex;
+		private static int vertexIndex;
 
-		private Vector3[] vertexList;
-		private Voxel[] initPoints;
-		private Mesh mesh;
-		private int[, , ] cubeIndexes;
+		private static Vector3[] vertexList = new Vector3[12];
+		private static Voxel[] initPoints = new Voxel[8];
+		private static int[, , ] cubeIndexes;
 
-		private readonly Vector3 zero = Vector3.zero;
+		public static Mesh CreateMeshData(VoxelList voxels, float isolevel) {
+			cubeIndexes = new int[voxels.X - 1, voxels.Y - 1, voxels.Z - 1];
+			cubeIndexes = GenerateCubeIndexes(voxels, isolevel);
+			int vertexCount = GenerateVertexCount(cubeIndexes);
 
-		public MarchingCubes(VoxelList voxels, float isolevel) {
-			this.isolevel = isolevel;
+			if (vertexCount <= 0) {
+				return new Mesh();
+			}
 
-			mesh = new Mesh();
+			vertices = new Vector3[vertexCount];
+			triangles = new int[vertexCount];
+
+			for (int x = 0; x < voxels.X - 1; x++) {
+				for (int y = 0; y < voxels.Y - 1; y++) {
+					for (int z = 0; z < voxels.Z - 1; z++) {
+						int cubeIndex = cubeIndexes[x, y, z];
+						if (cubeIndex == 0 || cubeIndex == 255) continue;
+
+						March(GetPoints(x, y, z, voxels), cubeIndex, isolevel);
+					}
+				}
+			}
 
 			vertexIndex = 0;
 
-			vertexList = new Vector3[12];
-			initPoints = new Voxel[8];
-			cubeIndexes = new int[voxels.X - 1, voxels.Y - 1, voxels.Z - 1];
+			Mesh mesh = new Mesh();
+			mesh.vertices = vertices;
+			mesh.SetTriangles(triangles, 0);
+			mesh.RecalculateNormals();
+
+			return mesh;
 		}
 
-		private Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2) {
+		private static Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2, float isolevel) {
 			if (Utils.Abs(isolevel - v1) < 0.000001f) {
 				return p1;
 			}
@@ -45,10 +62,10 @@ namespace MarchingCubes {
 			return p;
 		}
 
-		private void March(Voxel[] points, int cubeIndex) {
+		private static void March(Voxel[] points, int cubeIndex, float isolevel) {
 			int edgeIndex = LookupTables.EdgeTable[cubeIndex];
 
-			vertexList = GenerateVertexList(points, edgeIndex);
+			vertexList = GenerateVertexList(points, edgeIndex, isolevel);
 
 			int[] row = LookupTables.TriangleTable[cubeIndex];
 
@@ -67,7 +84,7 @@ namespace MarchingCubes {
 			}
 		}
 
-		private Vector3[] GenerateVertexList(Voxel[] points, int edgeIndex) {
+		private static Vector3[] GenerateVertexList(Voxel[] points, int edgeIndex, float isolevel) {
 			for (int i = 0; i < 12; i++) {
 				if ((edgeIndex & (1 << i)) != 0) {
 					int[] edgePair = LookupTables.EdgeIndexTable[i];
@@ -77,57 +94,24 @@ namespace MarchingCubes {
 					Voxel point1 = points[edge1];
 					Voxel point2 = points[edge2];
 
-					vertexList[i] = VertexInterpolate(point1.localPosition, point2.localPosition, point1.density, point2.density);
+					vertexList[i] = VertexInterpolate(point1.localPosition, point2.localPosition, point1.density, point2.density, isolevel);
 				}
 			}
 
 			return vertexList;
 		}
 
-		private int CalculateCubeIndex(Voxel[] points, float iso) {
+		private static int CalculateCubeIndex(Voxel[] points, float isolevel) {
 			int cubeIndex = 0;
 
 			for (int i = 0; i < 8; i++)
-				if (points[i].density < iso)
+				if (points[i].density < isolevel)
 					cubeIndex |= 1 << i;
 
 			return cubeIndex;
 		}
 
-		public Mesh CreateMeshData(VoxelList voxels) {
-			cubeIndexes = GenerateCubeIndexes(voxels);
-			int vertexCount = GenerateVertexCount(cubeIndexes);
-
-			if (vertexCount <= 0) {
-				return new Mesh();
-			}
-
-			vertices = new Vector3[vertexCount];
-			triangles = new int[vertexCount];
-
-			for (int x = 0; x < voxels.X - 1; x++) {
-				for (int y = 0; y < voxels.Y - 1; y++) {
-					for (int z = 0; z < voxels.Z - 1; z++) {
-						int cubeIndex = cubeIndexes[x, y, z];
-						if (cubeIndex == 0 || cubeIndex == 255) continue;
-
-						March(GetPoints(x, y, z, voxels), cubeIndex);
-					}
-				}
-			}
-
-			vertexIndex = 0;
-
-			mesh.Clear();
-
-			mesh.vertices = vertices;
-			mesh.SetTriangles(triangles, 0);
-			mesh.RecalculateNormals();
-
-			return mesh;
-		}
-
-		private Voxel[] GetPoints(int x, int y, int z, VoxelList voxels) {
+		private static Voxel[] GetPoints(int x, int y, int z, VoxelList voxels) {
 			for (int i = 0; i < 8; i++) {
 				Voxel p = voxels[x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]];
 				initPoints[i] = p;
@@ -136,7 +120,7 @@ namespace MarchingCubes {
 			return initPoints;
 		}
 
-		private int[, , ] GenerateCubeIndexes(VoxelList voxels) {
+		private static int[, , ] GenerateCubeIndexes(VoxelList voxels, float isolevel) {
 			for (int x = 0; x < voxels.X - 1; x++) {
 				for (int y = 0; y < voxels.Y - 1; y++) {
 					for (int z = 0; z < voxels.Z - 1; z++) {
@@ -150,7 +134,7 @@ namespace MarchingCubes {
 			return cubeIndexes;
 		}
 
-		private int GenerateVertexCount(int[, , ] cubeIndexes) {
+		private static int GenerateVertexCount(int[, , ] cubeIndexes) {
 			int vertexCount = 0;
 
 			for (int x = 0; x < cubeIndexes.GetLength(0); x++) {

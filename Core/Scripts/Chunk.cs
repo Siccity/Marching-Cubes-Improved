@@ -17,7 +17,6 @@ namespace MarchingCubes {
 
 		private float isolevel;
 
-		private MarchingCubes marchingCubes;
 		public bool initialized { get; private set; }
 		public Bounds bounds { get; private set; }
 
@@ -34,8 +33,6 @@ namespace MarchingCubes {
 
 			bounds = new Bounds(position + (Vector3.one * chunkSize * 0.5f), Vector3Int.one * chunkSize);
 			voxels = new VoxelList(chunkSize + 1, chunkSize + 1, chunkSize + 1);
-
-			marchingCubes = new MarchingCubes(voxels, isolevel);
 
 			// Initialize all positions with 0 density
 			Set(pos => 0f);
@@ -99,7 +96,7 @@ namespace MarchingCubes {
 		}
 
 		public void UpdateMesh() {
-			Mesh mesh = marchingCubes.CreateMeshData(voxels);
+			Mesh mesh = MarchingCubes.CreateMeshData(voxels, isolevel);
 			meshFilter.sharedMesh = mesh;
 			meshCollider.sharedMesh = mesh;
 			dirty = false;
