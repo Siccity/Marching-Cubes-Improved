@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace MarchingCubes {
+	[Serializable]
 	public struct Voxel {
 		public Vector3Int localPosition;
 		public float density;

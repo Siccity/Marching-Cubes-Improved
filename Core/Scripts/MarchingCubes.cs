@@ -55,13 +55,11 @@ namespace MarchingCubes {
 		private static int[, , ] GenerateCubeIndexes(VoxelGrid voxels, float isolevel) {
 			for (int x = 0; x < voxels.X - 1; x++) {
 				for (int y = 0; y < voxels.Y - 1; y++) {
-					for (int z = 0; z < voxels.Z - 1; z++) {
-						VoxelCorners corners = voxels.GetCorners(x,y,z);
-
-						cubeIndexes[x, y, z] = corners.GetCubeIndex(isolevel);
+					for (int z = 0; z < voxels.Z - 1; z++) {	
+						cubeIndexes[x, y, z] = voxels.GetCubeIndex(x,y,z, isolevel);
 					}
 				}
-			}
+			} 
 			return cubeIndexes;
 		}
 

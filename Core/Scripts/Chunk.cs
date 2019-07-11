@@ -19,7 +19,7 @@ namespace MarchingCubes {
 
 		private float isolevel;
 
-		public bool initialized { get; private set; }
+		public bool initialized { get { return voxels != null; } }
 		public Bounds bounds { get; private set; }
 
 		private void Update() {
@@ -37,7 +37,6 @@ namespace MarchingCubes {
 
 			// Initialize all positions with 0 density
 			Set(pos => 0f);
-			initialized = true;
 		}
 
 		public void Set(Func<Vector3Int, float> densityFunction) {

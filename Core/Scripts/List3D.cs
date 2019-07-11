@@ -1,26 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MarchingCubes {
 	/// <summary> A 3-dimensional jagged array </summary>
 	[Serializable] public class ChunkGrid : List3D<Chunk> { public ChunkGrid(int x, int y, int z) : base(x, y, z) { } }
 
 	/// <summary> Serializable 3-dimensional list backed by a jagged list </summary>
-	public class List3D<T> {
+	public class List3D<T> : ISerializationCallbackReceiver {
 		public T this [int x, int y, int z] {
 			get { return list[GetIndex(x, y, z)]; }
 			set { list[GetIndex(x, y, z)] = value; }
 		}
 
 		/// <summary> 3-dimensional jagged array </summary>
-		[SerializeField] private List<T> list;
+		[SerializeField] protected List<T> list;
 		/// <summary> Length in the x dimension </summary>
-		[SerializeField] private int x;
+		[SerializeField] protected int x;
 		/// <summary> Length in the y dimension </summary>
-		[SerializeField] private int y;
+		[SerializeField] protected int y;
 		/// <summary> Length in the z dimension </summary>
-		[SerializeField] private int z;
+		[SerializeField] protected int z;
 
 		/// <summary> Length in the x dimension </summary>
 		public int X { get { return x; } }
@@ -29,12 +30,16 @@ namespace MarchingCubes {
 		/// <summary> Length in the z dimension </summary>
 		public int Z { get { return z; } }
 
+		/// <summary> x * y cached </summary>
+		private int xy;
+
 		public List3D(int x, int y, int z) : this(x, y, z, default(T)) { }
 
 		public List3D(int x, int y, int z, T value) {
 			this.x = x;
 			this.y = y;
 			this.z = z;
+			xy = x * y;
 			int items = x * y * z;
 			list = new List<T>(x * y * z);
 			for (int i = 0; i < items; i++) {
@@ -43,7 +48,7 @@ namespace MarchingCubes {
 		}
 
 		private int GetIndex(int x, int y, int z) {
-			return x + (this.x * y) + (this.x * this.y * z);
+			return x + (this.x * y) + (xy * z);
 		}
 
 		public void InsertX(int index, T value) {
@@ -55,6 +60,7 @@ namespace MarchingCubes {
 					list.Insert(i, value);
 				}
 			}
+			xy = x * y;
 		}
 
 		public void InsertY(int index, T value) {
@@ -66,6 +72,7 @@ namespace MarchingCubes {
 					list.Insert(i, value);
 				}
 			}
+			xy = x * y;
 		}
 
 		public void InsertZ(int index, T value) {
@@ -77,6 +84,12 @@ namespace MarchingCubes {
 					list.Insert(i, value);
 				}
 			}
+		}
+
+		public void OnBeforeSerialize() { }
+
+		public void OnAfterDeserialize() {
+			xy = x * y;
 		}
 	}
 }
