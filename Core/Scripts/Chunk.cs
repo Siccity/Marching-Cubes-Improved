@@ -27,18 +27,6 @@ namespace MarchingCubes {
 			if (dirty) UpdateMesh();
 		}
 
-		/* private void OnDrawGizmosSelected() {
-			if (initialized) {
-				for (int x = 0; x < points.GetLength(0); x++) {
-					for (int y = 0; y < points.GetLength(1); y++) {
-						for (int z = 0; z < points.GetLength(2); z++) {
-							if (points[x,y,z].density > 0) Gizmos.DrawSphere(points[x,y,z].localPosition + transform.position, Mathf.Clamp01(points[x,y,z].density) * 0.2f);
-						}
-					}
-				}
-			}
-		} */
-
 		public void Initialize(int chunkSize, Vector3Int position, float isolevel) {
 			this.chunkSize = chunkSize;
 			this.position = position;
