@@ -8,7 +8,7 @@ namespace MarchingCubes {
 
 		[SerializeField] public ChunkGrid chunks;
 
-		public bool initialized { get; private set; }
+		public bool initialized { get { return chunks != null; } }
 		public int chunkSize { get; private set; }
 		public Bounds bounds { get; private set; }
 
@@ -27,7 +27,6 @@ namespace MarchingCubes {
 				return;
 			}
 			CreateChunks(size, chunkSize, isolevel);
-			initialized = true;
 		}
 
 		[ContextMenu("Deinitialize")]
@@ -40,7 +39,6 @@ namespace MarchingCubes {
 				EnumerateChunks(x => DestroyImmediate(x.gameObject));
 				chunks = null;
 			}
-			initialized = false;
 		}
 
 		public void Generate(Func<Vector3Int, float> densityFunction, bool updateMesh = true) {
@@ -120,7 +118,7 @@ namespace MarchingCubes {
 			return p;
 		}
 
-		public void SetDensity(float density, int worldPosX, int worldPosY, int worldPosZ, bool setReadyForUpdate, Chunk[] initChunks) {
+		public void SetDensity(float density, int worldPosX, int worldPosY, int worldPosZ, bool setReadyForUpdate) {
 			Vector3Int dp = new Vector3Int(worldPosX, worldPosY, worldPosZ);
 
 			Vector3Int lastChunkPos = dp.FloorToNearestX(chunkSize);
@@ -144,8 +142,8 @@ namespace MarchingCubes {
 			}
 		}
 
-		public void SetDensity(float density, Vector3Int pos, bool setReadyForUpdate, Chunk[] initChunks) {
-			SetDensity(density, pos.x, pos.y, pos.z, setReadyForUpdate, initChunks);
+		public void SetDensity(float density, Vector3Int pos, bool setReadyForUpdate) {
+			SetDensity(density, pos.x, pos.y, pos.z, setReadyForUpdate);
 		}
 
 		private void UpdateBounds() {
