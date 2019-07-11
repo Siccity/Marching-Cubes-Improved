@@ -12,9 +12,6 @@ namespace MarchingCubes {
 		public int chunkSize { get; private set; }
 		public Bounds bounds { get; private set; }
 
-		/// <summary> A 3-dimensional jagged array </summary>
-		[Serializable] public class ChunkList : List3D<Chunk> { public ChunkList(int x, int y, int z) : base(x, y, z, null) { } }
-
 		private void OnDrawGizmos() {
 			if (initialized) {
 				Gizmos.color = new Color(1f, 1f, 1f, 0.05f);
@@ -104,7 +101,7 @@ namespace MarchingCubes {
 		}
 
 		public float GetDensity(int x, int y, int z) {
-			Point p = GetPoint(x, y, z);
+			Voxel p = GetPoint(x, y, z);
 
 			return p.density;
 		}
@@ -113,10 +110,10 @@ namespace MarchingCubes {
 			return GetDensity(pos.x, pos.y, pos.z);
 		}
 
-		public Point GetPoint(int x, int y, int z) {
+		public Voxel GetPoint(int x, int y, int z) {
 			Chunk chunk = GetChunk(x, y, z);
 
-			Point p = chunk.GetPoint(x.Mod(chunkSize),
+			Voxel p = chunk.GetPoint(x.Mod(chunkSize),
 				y.Mod(chunkSize),
 				z.Mod(chunkSize));
 

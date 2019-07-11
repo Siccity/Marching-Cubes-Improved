@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MarchingCubes {
+	/// <summary> A 3-dimensional jagged array </summary>
+	[Serializable] public class ChunkList : List3D<Chunk> { public ChunkList(int x, int y, int z) : base(x, y, z) { } }
+
+	/// <summary> A 3-dimensional jagged array </summary>
+	[Serializable] public class VoxelList : List3D<Voxel> { public VoxelList(int x, int y, int z) : base(x, y, z) { } }
+
 	/// <summary> Serializable 3-dimensional list backed by a jagged list </summary>
 	public class List3D<T> {
 		public T this [int x, int y, int z] {
@@ -25,6 +31,8 @@ namespace MarchingCubes {
 		public int Y { get { return y; } }
 		/// <summary> Length in the z dimension </summary>
 		public int Z { get { return z; } }
+
+		public List3D(int x, int y, int z) : this(x, y, z, default(T)) { }
 
 		public List3D(int x, int y, int z, T value) {
 			this.x = x;
