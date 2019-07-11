@@ -1,14 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MarchingCubes {
 	public class Terrain : MonoBehaviour {
 		public Material material;
 
+		[SerializeField] public ChunkList chunks;
+
 		public bool initialized { get; private set; }
-		public Chunk[, , ] chunks { get; private set; }
 		public int chunkSize { get; private set; }
 		public Bounds bounds { get; private set; }
+
+		/// <summary> A 3-dimensional jagged array </summary>
+		[Serializable] public class ChunkList : List3D<Chunk> { public ChunkList(int x, int y, int z) : base(x, y, z, null) { } }
 
 		private void OnDrawGizmos() {
 			if (initialized) {
@@ -60,10 +65,10 @@ namespace MarchingCubes {
 		private void CreateChunks(Vector3Int size, int chunkSize, float isolevel) {
 			Debug.Log("Create chunks");
 			this.chunkSize = chunkSize;
-			chunks = new Chunk[size.x, size.y, size.z];
-			for (int x = 0; x < chunks.GetLength(0); x++) {
-				for (int y = 0; y < chunks.GetLength(1); y++) {
-					for (int z = 0; z < chunks.GetLength(2); z++) {
+			chunks = new ChunkList(size.x, size.y, size.z);
+			for (int x = 0; x < chunks.X; x++) {
+				for (int y = 0; y < chunks.Y; y++) {
+					for (int z = 0; z < chunks.Z; z++) {
 						Vector3Int pos = new Vector3Int(x, y, z) * chunkSize;
 						Chunk chunk = CreateChunk(pos, isolevel);
 						chunks[x, y, z] = chunk;
@@ -78,9 +83,9 @@ namespace MarchingCubes {
 				Debug.LogError("Terrain not initialized!");
 				return;
 			}
-			for (int x = 0; x < chunks.GetLength(0); x++) {
-				for (int y = 0; y < chunks.GetLength(1); y++) {
-					for (int z = 0; z < chunks.GetLength(2); z++) {
+			for (int x = 0; x < chunks.X; x++) {
+				for (int y = 0; y < chunks.Y; y++) {
+					for (int z = 0; z < chunks.Z; z++) {
 						onChunk(chunks[x, y, z]);
 					}
 				}
@@ -147,16 +152,16 @@ namespace MarchingCubes {
 		}
 
 		private void UpdateBounds() {
-			float middleX = chunks.GetLength(0) * chunkSize / 2f;
-			float middleY = chunks.GetLength(1) * chunkSize / 2f;
-			float middleZ = chunks.GetLength(2) * chunkSize / 2f;
+			float middleX = chunks.X * chunkSize / 2f;
+			float middleY = chunks.Y * chunkSize / 2f;
+			float middleZ = chunks.Z * chunkSize / 2f;
 
 			Vector3 midPos = new Vector3(middleX, middleY, middleZ);
 
 			Vector3Int size = new Vector3Int(
-				chunks.GetLength(0) * chunkSize,
-				chunks.GetLength(1) * chunkSize,
-				chunks.GetLength(2) * chunkSize);
+				chunks.X * chunkSize,
+				chunks.Y * chunkSize,
+				chunks.Z * chunkSize);
 
 			bounds = new Bounds(midPos, size);
 		}
