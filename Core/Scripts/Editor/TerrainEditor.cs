@@ -14,7 +14,7 @@ namespace MarchingCubesEditor {
 		public float radius = 10f;
 		public float height = 10f;
 		public int seed = 0;
-		public Vector3 center = Vector3.zero;
+		public Vector3 center = new Vector3(20, 20, 20);
 
 		public void OnEnable() {
 			terrain = target as MarchingCubes.Terrain;
@@ -29,6 +29,8 @@ namespace MarchingCubesEditor {
 				case 0:
 					noiseScale = EditorGUILayout.FloatField("Noise Scale", noiseScale);
 					seed = EditorGUILayout.IntField("Seed", seed);
+					height = EditorGUILayout.FloatField("Height", height);
+					center = EditorGUILayout.Vector3Field("Offset", center);
 					if (GUILayout.Button(terrain.initialized ? "Update" : "Initialize") || (EditorGUI.EndChangeCheck() && automatic)) {
 						if (!terrain.initialized) terrain.Initialize(new Vector3Int(5, 5, 5), 8, isolevel);
 						FastNoise noise = new FastNoise(seed);
@@ -65,20 +67,20 @@ namespace MarchingCubesEditor {
 		}
 
 		public float GenerateNoise(Vector3Int pos, FastNoise noise) {
-			return pos.y - noise.GetPerlin(pos.x / noiseScale, pos.z / noiseScale).Map(-1, 1, 0, 1) * 10 - 10;
+			return (center.y - pos.y) + noise.GetPerlin((center.x - pos.x) / noiseScale, (center.z - pos.z) / noiseScale) * height;
 		}
 
 		public float GenerateSphere(Vector3Int pos) {
-			return Vector3.Distance(center, pos) / radius;
+			return 1 - (Vector3.Distance(center, pos) / radius);
 		}
 
 		public float GenerateFlat(Vector3Int pos) {
-			return pos.y - height + 0.5f;
+			return height + 0.5f - pos.y;
 		}
 
 		public float GenerateCube(Vector3Int pos) {
 			Vector3 local = pos - center;
-			return (Mathf.Abs(local.x) > radius || Mathf.Abs(local.y) > radius || Mathf.Abs(local.z) > radius) ? 0 : 1; 
+			return Mathf.Min(radius - Mathf.Abs(local.x), radius - Mathf.Abs(local.y), radius - Mathf.Abs(local.z));
 		}
 	}
 }

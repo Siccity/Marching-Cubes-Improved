@@ -28,7 +28,7 @@ namespace MarchingCubes {
 		public int GetCubeIndex(int x, int y, int z, float isolevel) {
 			int cubeIndex = 0;
 			for (int i = 0; i < 8; i++) {
-				if (this [x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]].density < isolevel) cubeIndex |= 1 << i;
+				if (this [x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]].density > isolevel) cubeIndex |= 1 << i;
 			}
 			return cubeIndex;
 		}
