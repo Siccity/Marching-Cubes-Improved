@@ -1,18 +1,28 @@
 ﻿namespace MarchingCubes {
 	public static class LookupTables {
-		public static readonly int[][] EdgeIndexTable = {
-			new [] { 0, 1 },
-			new [] { 1, 2 },
-			new [] { 2, 3 },
-			new [] { 3, 0 },
-			new [] { 4, 5 },
-			new [] { 5, 6 },
-			new [] { 6, 7 },
-			new [] { 7, 4 },
-			new [] { 0, 4 },
-			new [] { 1, 5 },
-			new [] { 2, 6 },
-			new [] { 3, 7 }
+
+		public struct Edge {
+			public int a, b;
+
+			public Edge(int a, int b) {
+				this.a = a;
+				this.b = b;
+			}
+		}
+
+		public static readonly Edge[] EdgeIndexTable = {
+			new Edge(0, 1),
+			new Edge(1, 2),
+			new Edge(2, 3),
+			new Edge(3, 0),
+			new Edge(4, 5),
+			new Edge(5, 6),
+			new Edge(6, 7),
+			new Edge(7, 4),
+			new Edge(0, 4),
+			new Edge(1, 5),
+			new Edge(2, 6),
+			new Edge(3, 7)
 		};
 
 		public static readonly int[] EdgeTable = {

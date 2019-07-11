@@ -6,7 +6,7 @@ namespace MarchingCubes {
 	public class Terrain : MonoBehaviour {
 		public Material material;
 
-		[SerializeField] public ChunkList chunks;
+		[SerializeField] public ChunkGrid chunks;
 
 		public bool initialized { get; private set; }
 		public int chunkSize { get; private set; }
@@ -62,7 +62,7 @@ namespace MarchingCubes {
 		private void CreateChunks(Vector3Int size, int chunkSize, float isolevel) {
 			Debug.Log("Create chunks");
 			this.chunkSize = chunkSize;
-			chunks = new ChunkList(size.x, size.y, size.z);
+			chunks = new ChunkGrid(size.x, size.y, size.z);
 			for (int x = 0; x < chunks.X; x++) {
 				for (int y = 0; y < chunks.Y; y++) {
 					for (int z = 0; z < chunks.Z; z++) {

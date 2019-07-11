@@ -5,8 +5,10 @@ namespace MarchingCubes {
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 	public class Chunk : MonoBehaviour {
 		[HideInInspector] public bool dirty;
-		public VoxelList voxels;
-		[HideInInspector] public int chunkSize;
+		public VoxelGrid voxels;
+
+		public int ChunkSize { get { return voxels.X - 1; } }
+
 		[HideInInspector] public Vector3Int position;
 		public MeshFilter meshFilter { get { return _meshFilter != null ? _meshFilter : _meshFilter = GetComponent<MeshFilter>(); } }
 		private MeshFilter _meshFilter;
@@ -27,12 +29,11 @@ namespace MarchingCubes {
 		}
 
 		public void Initialize(int chunkSize, Vector3Int position, float isolevel) {
-			this.chunkSize = chunkSize;
 			this.position = position;
 			this.isolevel = isolevel;
 
 			bounds = new Bounds(position + (Vector3.one * chunkSize * 0.5f), Vector3Int.one * chunkSize);
-			voxels = new VoxelList(chunkSize + 1, chunkSize + 1, chunkSize + 1);
+			voxels = new VoxelGrid(chunkSize + 1, chunkSize + 1, chunkSize + 1);
 
 			// Initialize all positions with 0 density
 			Set(pos => 0f);
@@ -40,7 +41,6 @@ namespace MarchingCubes {
 		}
 
 		public void Set(Func<Vector3Int, float> densityFunction) {
-			voxels = new VoxelList(chunkSize + 1, chunkSize + 1, chunkSize + 1);
 			for (int x = 0; x < voxels.X; x++) {
 				for (int y = 0; y < voxels.Y; y++) {
 					for (int z = 0; z < voxels.Z; z++) {

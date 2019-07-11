@@ -4,10 +4,7 @@ using UnityEngine;
 
 namespace MarchingCubes {
 	/// <summary> A 3-dimensional jagged array </summary>
-	[Serializable] public class ChunkList : List3D<Chunk> { public ChunkList(int x, int y, int z) : base(x, y, z) { } }
-
-	/// <summary> A 3-dimensional jagged array </summary>
-	[Serializable] public class VoxelList : List3D<Voxel> { public VoxelList(int x, int y, int z) : base(x, y, z) { } }
+	[Serializable] public class ChunkGrid : List3D<Chunk> { public ChunkGrid(int x, int y, int z) : base(x, y, z) { } }
 
 	/// <summary> Serializable 3-dimensional list backed by a jagged list </summary>
 	public class List3D<T> {
