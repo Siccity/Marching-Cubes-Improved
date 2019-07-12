@@ -7,9 +7,10 @@ namespace MarchingCubes {
 		public Material material;
 
 		[SerializeField] public ChunkGrid chunks;
+		[SerializeField] private int chunkSize;
 
 		public bool initialized { get { return chunks != null; } }
-		public int chunkSize { get; private set; }
+		public int ChunkSize { get { return chunkSize; } }
 		public Bounds bounds { get; private set; }
 
 		private void OnDrawGizmos() {
@@ -41,20 +42,32 @@ namespace MarchingCubes {
 			}
 		}
 
-		public void Generate(Func<Vector3Int, float> densityFunction, bool updateMesh = true) {
-			EnumerateChunks(x => { x.Set(densityFunction); if (updateMesh) x.UpdateMesh(); });
+		/// <summary> Set terrain voxel values for the entire terrain. For better performance consider modifying individual chunks instead. </summary>
+		/// <param name="densityFunction">Return density to be subtracted from given position</param>
+		/// <param name="remeshNow">Generate new mesh instantly? If false, will remesh next frame.</param>
+		public void Generate(Func<Vector3Int, float> densityFunction, bool remeshNow) {
+			EnumerateChunks(x => { x.Set(densityFunction); if (remeshNow && x.dirty) x.Remesh(); });
 		}
 
-		public void Union(Func<Vector3Int, float> densityFunction, bool updateMesh = true) {
-			EnumerateChunks(x => { x.Union(densityFunction); if (updateMesh) x.UpdateMesh(); });
+		/// <summary> Merge a function with the current terrain. For better performance consider modifying individual chunks instead. </summary>
+		/// <param name="densityFunction">Return density to be subtracted from given position</param>
+		/// <param name="remeshNow">Generate new mesh instantly? If false, will remesh next frame.</param>
+		public void Union(Func<Vector3Int, float> densityFunction, bool remeshNow) {
+			EnumerateChunks(x => { x.Union(densityFunction); if (remeshNow && x.dirty) x.Remesh(); });
 		}
 
-		public void Subtract(Func<Vector3Int, float> densityFunction, bool updateMesh = true) {
-			EnumerateChunks(x => { x.Subtract(densityFunction); if (updateMesh) x.UpdateMesh(); });
+		/// <summary> Subtract a function from the entire terrain. For better performance consider modifying individual chunks instead. </summary>
+		/// <param name="densityFunction">Return density to be subtracted from given position</param>
+		/// <param name="remeshNow">Generate new mesh instantly? If false, will remesh next frame.</param>
+		public void Subtract(Func<Vector3Int, float> densityFunction, bool remeshNow) {
+			System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+			stopwatch.Start();
+			EnumerateChunks(x => { x.Subtract(densityFunction); if (remeshNow && x.dirty) x.Remesh(); });
+			Debug.Log(stopwatch.Elapsed);
 		}
 
-		public void Intersection(Func<Vector3Int, float> densityFunction, bool updateMesh = true) {
-			EnumerateChunks(x => { x.Intersection(densityFunction); if (updateMesh) x.UpdateMesh(); });
+		public void Intersection(Func<Vector3Int, float> densityFunction, bool remeshNow) {
+			EnumerateChunks(x => { x.Intersection(densityFunction); if (remeshNow && x.dirty) x.Remesh(); });
 		}
 
 		private void CreateChunks(Vector3Int size, int chunkSize, float isolevel) {

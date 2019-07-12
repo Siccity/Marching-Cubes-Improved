@@ -34,7 +34,7 @@ namespace MarchingCubesEditor {
 					if (GUILayout.Button(terrain.initialized ? "Update" : "Initialize") || (EditorGUI.EndChangeCheck() && automatic)) {
 						if (!terrain.initialized) terrain.Initialize(new Vector3Int(5, 5, 5), 8, isolevel);
 						FastNoise noise = new FastNoise(seed);
-						terrain.Generate(x => GenerateNoise(x, noise));
+						terrain.Generate(x => GenerateNoise(x, noise), true);
 					}
 					break;
 				case 1:
@@ -42,14 +42,14 @@ namespace MarchingCubesEditor {
 					radius = EditorGUILayout.FloatField("Radius", radius);
 					if (GUILayout.Button(terrain.initialized ? "Update" : "Initialize") || (EditorGUI.EndChangeCheck() && automatic)) {
 						if (!terrain.initialized) terrain.Initialize(new Vector3Int(5, 5, 5), 8, isolevel);
-						terrain.Generate(GenerateSphere);
+						terrain.Generate(GenerateSphere, true);
 					}
 					break;
 				case 2:
 					height = EditorGUILayout.FloatField("Height", height);
 					if (GUILayout.Button(terrain.initialized ? "Update" : "Initialize") || (EditorGUI.EndChangeCheck() && automatic)) {
 						if (!terrain.initialized) terrain.Initialize(new Vector3Int(5, 5, 5), 8, isolevel);
-						terrain.Generate(GenerateFlat);
+						terrain.Generate(GenerateFlat, true);
 					}
 					break;
 				case 3:
@@ -57,7 +57,7 @@ namespace MarchingCubesEditor {
 					radius = EditorGUILayout.FloatField("Radius", radius);
 					if (GUILayout.Button(terrain.initialized ? "Update" : "Initialize") || (EditorGUI.EndChangeCheck() && automatic)) {
 						if (!terrain.initialized) terrain.Initialize(new Vector3Int(5, 5, 5), 8, isolevel);
-						terrain.Generate(GenerateCube);
+						terrain.Generate(GenerateCube, true);
 					}
 					break;
 			}

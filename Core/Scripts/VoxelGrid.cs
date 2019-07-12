@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace MarchingCubes {
 	/// <summary> A 3-dimensional jagged array </summary>
@@ -23,6 +24,20 @@ namespace MarchingCubes {
 			Voxel rgtUpFwd = this [x + 1, y + 1, z + 1];
 			Voxel lftUpFwd = this [x + 0, y + 1, z + 1];
 			return new VoxelCorners(lftDnBk, rgtDnBk, rgtDnFwd, lftDnFwd, lftUpBk, rgtUpBk, rgtUpFwd, lftUpFwd);
+		}
+
+		public void Subtract(Func<Vector3Int, float, float> densityFunction) {
+			int count = 0;
+			for (int z = 0; z < this.z; z++) {
+				for (int y = 0; y < this.y; y++) {
+					for (int x = 0; x < this.x; x++) {
+						Voxel voxel = list[count];
+						voxel.density = densityFunction(new Vector3Int(x,y,z), voxel.density);
+						list[count] = voxel;
+						count++;
+					}
+				}
+			}
 		}
 
 		public int GetCubeIndex(int x, int y, int z, float isolevel) {

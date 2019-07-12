@@ -46,7 +46,14 @@ namespace MarchingCubes {
 		}
 
 		private void EditTerrain(Terrain terrain, Vector3 point, bool addTerrain, float force, float range) {
-			terrain.Subtract(x => 1 - (Vector3.Distance(point, x) / range) * force * Time.deltaTime);
+			float sqrtRange = Mathf.Sqrt(range);
+			terrain.chunks.Foreach((x, y, z, chunk) => {
+				Vector3 center = terrain.transform.position + (new Vector3(x + 0.5f, y + 0.5f, z + 0.5f) * terrain.ChunkSize);
+				Bounds bounds = new Bounds(center, Vector3.one * terrain.ChunkSize);
+				if (bounds.SqrDistance(point) < sqrtRange) {
+					chunk.Subtract(pos => 1 - (Vector3.Distance(point, pos) / range) * force * Time.deltaTime);
+				}
+			});
 		}
 	}
 }

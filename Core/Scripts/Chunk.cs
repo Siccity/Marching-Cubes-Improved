@@ -25,7 +25,7 @@ namespace MarchingCubes {
 		private void Update() {
 			if (!initialized) return;
 
-			if (dirty) UpdateMesh();
+			if (dirty) Remesh();
 		}
 
 		public void Initialize(int chunkSize, Vector3Int position, float isolevel) {
@@ -67,17 +67,25 @@ namespace MarchingCubes {
 		}
 
 		public void Subtract(Func<Vector3Int, float> densityFunction) {
-			for (int x = 0; x < voxels.X; x++) {
+			//00:00:00.3308732
+			//00:00:00.3367376
+			/* for (int x = 0; x < voxels.X; x++) {
 				for (int y = 0; y < voxels.Y; y++) {
 					for (int z = 0; z < voxels.Z; z++) {
 						Vector3Int pos = new Vector3Int(x, y, z);
+						float value = densityFunction(pos);
+						if (value != 0f) dirty = true;
 						Voxel voxel = voxels[x, y, z];
-						voxel.density = Mathf.Clamp01(voxel.density - densityFunction(pos));
+						voxel.density = Mathf.Clamp01(voxel.density - value);
 						voxels[x, y, z] = voxel;
 					}
 				}
-			}
-			dirty = true;
+			} */
+			voxels.Subtract((pos, density) => {
+				float value = densityFunction(pos);
+				if (!dirty && value != 0f && (density != 0 && value > 0)) dirty = true;
+				return Mathf.Clamp01(density - value);
+			});
 		}
 
 		public void Intersection(Func<Vector3Int, float> densityFunction) {
@@ -94,7 +102,8 @@ namespace MarchingCubes {
 			dirty = true;
 		}
 
-		public void UpdateMesh() {
+		/// <summary> Update mesh from voxel data. Automatically called on update if dirty. </summary>
+		public void Remesh() {
 			Mesh mesh = MarchingCubes.CreateMeshData(voxels, isolevel);
 			meshFilter.sharedMesh = mesh;
 			meshCollider.sharedMesh = mesh;

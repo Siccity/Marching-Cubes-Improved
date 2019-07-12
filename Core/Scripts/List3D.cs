@@ -4,9 +4,6 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace MarchingCubes {
-	/// <summary> A 3-dimensional jagged array </summary>
-	[Serializable] public class ChunkGrid : List3D<Chunk> { public ChunkGrid(int x, int y, int z) : base(x, y, z) { } }
-
 	/// <summary> Serializable 3-dimensional list backed by a jagged list </summary>
 	public class List3D<T> : ISerializationCallbackReceiver {
 		public T this [int x, int y, int z] {
@@ -44,6 +41,17 @@ namespace MarchingCubes {
 			list = new List<T>(x * y * z);
 			for (int i = 0; i < items; i++) {
 				list.Add(value);
+			}
+		}
+
+		public void Foreach(Action<int, int, int, T> action) {
+			int count = 0;
+			for (int z = 0; z < this.z; z++) {
+				for (int y = 0; y < this.y; y++) {
+					for (int x = 0; x < this.x; x++) {
+						action(x, y, z, list[count++]);
+					}
+				}
 			}
 		}
 
