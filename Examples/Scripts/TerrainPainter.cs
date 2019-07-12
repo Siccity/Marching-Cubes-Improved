@@ -24,7 +24,7 @@ namespace MarchingCubes {
 				return;
 			}
 
-			if (Input.GetButton("Fire1")) {
+			if (Input.GetButtonDown("Fire1")) {
 				RaycastToTerrain(true);
 			} else if (Input.GetButton("Fire2")) {
 				RaycastToTerrain(false);
@@ -51,7 +51,10 @@ namespace MarchingCubes {
 				Vector3 center = terrain.transform.position + (new Vector3(x + 0.5f, y + 0.5f, z + 0.5f) * terrain.ChunkSize);
 				Bounds bounds = new Bounds(center, Vector3.one * terrain.ChunkSize);
 				if (bounds.SqrDistance(point) < sqrtRange) {
-					chunk.Subtract(pos => 1 - (Vector3.Distance(point, pos) / range) * force * Time.deltaTime);
+					chunk.Subtract(pos => {
+						float subtract = Mathf.Clamp01(1f - (Vector3.Distance(point, chunk.transform.TransformPoint(pos))) / range);
+						return subtract;
+					});
 				}
 			});
 		}

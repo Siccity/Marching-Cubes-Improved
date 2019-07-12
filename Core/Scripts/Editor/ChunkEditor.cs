@@ -15,15 +15,18 @@ namespace MarchingCubesEditor {
 
 		private void OnSceneGUI() {
 			if (chunk.initialized) {
-				for (int x = 0; x < chunk.voxels.X; x++) {
-					for (int y = 0; y < chunk.voxels.Y; y++) {
-						for (int z = 0; z < chunk.voxels.Z; z++) {
-							Vector3 pos = chunk.voxels[x, y, z].localPosition + chunk.transform.position;
-							float size = Mathf.Clamp01(chunk.voxels[x, y, z].density) * 0.2f;
-							if (chunk.voxels[x, y, z].density > 0) Handles.SphereHandleCap(-1, pos, Quaternion.identity, size, EventType.Repaint);
-						}
-					}
-				}
+				chunk.voxels.Foreach((x, y, z, voxel) => {
+					Vector3 pos = voxel.localPosition + chunk.transform.position;
+					float size = Mathf.Clamp01(voxel.density) * 0.2f;
+					Handles.color = size > 1 ? Color.red : Color.white;
+					if (voxel.density > 0) Handles.SphereHandleCap(-1, pos, Quaternion.identity, size, EventType.Repaint);
+				});
+			}
+			MarchingCubes.Terrain terrain = chunk.GetComponentInParent<MarchingCubes.Terrain>();
+			if (terrain) {
+				Vector3 center = chunk.transform.position;
+				Vector3 size = Vector3.one * terrain.ChunkSize;
+				Handles.DrawWireCube(center + (size * 0.5f), size);
 			}
 		}
 	}

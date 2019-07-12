@@ -67,20 +67,6 @@ namespace MarchingCubes {
 		}
 
 		public void Subtract(Func<Vector3Int, float> densityFunction) {
-			//00:00:00.3308732
-			//00:00:00.3367376
-			/* for (int x = 0; x < voxels.X; x++) {
-				for (int y = 0; y < voxels.Y; y++) {
-					for (int z = 0; z < voxels.Z; z++) {
-						Vector3Int pos = new Vector3Int(x, y, z);
-						float value = densityFunction(pos);
-						if (value != 0f) dirty = true;
-						Voxel voxel = voxels[x, y, z];
-						voxel.density = Mathf.Clamp01(voxel.density - value);
-						voxels[x, y, z] = voxel;
-					}
-				}
-			} */
 			voxels.Subtract((pos, density) => {
 				float value = densityFunction(pos);
 				if (!dirty && value != 0f && (density != 0 && value > 0)) dirty = true;
